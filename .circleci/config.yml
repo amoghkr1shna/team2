@@ -1,0 +1,47 @@
+version: 2.1
+
+executors:
+  clang-executor:
+    docker:
+      - image: ubuntu:latest
+    resource_class: small
+    environment:
+      CC: clang
+      CXX: clang++
+
+jobs:
+  clang-format-check:
+    executor: clang-executor
+    steps:
+      - checkout
+      - run:
+          name: Install clang-format
+          command: |
+            apt update && apt install -y clang-format
+      - run:
+          name: Run clang-format
+          command: |
+            find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+
+  clang-tidy-check:
+    executor: clang-executor
+    steps:
+      - checkout
+      - run:
+          name: Install clang-tidy
+          command: |
+            apt update && apt install -y clang-tidy
+      - run:
+          name: Run clang-tidy
+          command: |
+            for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
+              clang-tidy $file -- -std=c++17 || exit 1
+            done
+
+workflows:
+  version: 2
+  clang-checks:
+    jobs:
+      - clang-format-check
+      - clang-tidy-check
+
