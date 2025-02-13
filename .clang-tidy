@@ -1,0 +1,8 @@
+Checks: >
+  -*,
+  modernize-*,
+  readability-*,
+  performance-*,
+  bugprone-*
+WarningsAsErrors: '*'
+
