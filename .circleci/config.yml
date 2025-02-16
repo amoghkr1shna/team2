@@ -17,6 +17,7 @@ jobs:
       - run:
           name: Install clang-format
           command: |
+            export DEBIAN_FRONTEND=noninteractive
             apt update && apt install -y clang-format
       - run:
           name: Run clang-format
@@ -30,6 +31,7 @@ jobs:
       - run:
           name: Install clang-tidy
           command: |
+            export DEBIAN_FRONTEND=noninteractive
             apt update && apt install -y clang-tidy
       - run:
           name: Run clang-tidy
