@@ -10,6 +10,7 @@ executors:
       CXX: clang++
 
 jobs:
+  # 1) clang-format-check (unchanged)
   clang-format-check:
     executor: clang-executor
     steps:
@@ -22,8 +23,9 @@ jobs:
       - run:
           name: Run clang-format
           command: |
-            find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+            find . -name ".c" -o -name ".cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
+  # 2) clang-tidy-check (unchanged)
   clang-tidy-check:
     executor: clang-executor
     steps:
@@ -36,11 +38,12 @@ jobs:
       - run:
           name: Run clang-tidy
           command: |
-            for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
-              clang-tidy $file -- -std=c++17 || exit 1
+            for file in $(find . -name ".c" -o -name ".cpp" -o -name "*.h"); do
+              clang-tidy "$file" -- -std=c++17 || exit 1
             done
 
-  build-and-compile:
+  # 3) build-and-test (replaces your old "build-and-compile" job)
+  build-and-test:
     executor: clang-executor
     steps:
       - checkout
@@ -48,23 +51,55 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y build-essential cmake clang
+            apt update && apt install -y \
+              build-essential cmake lcov
+
       - run:
-          name: Compile Components
+          name: CMake Configure (with coverage)
           command: |
-            mkdir -p build
-            clang++ -std=c++17 -Wall -Werror -c src/calculator.cpp -o build/calculator.o
-            clang++ -std=c++17 -Wall -Werror -c src/logger.cpp -o build/logger.o
-            clang++ -std=c++17 -Wall -Werror -c src/notifier.cpp -o build/notifier.o
+            mkdir build
+            cd build
+            cmake -DCMAKE_CXX_FLAGS="--coverage" ..
+
       - run:
-          name: Verify Build
-          command: ls -l build/
+          name: Build
+          command: |
+            cd build
+            make -j4
+
+      - run:
+          name: Run Tests (JUnit/XML output)
+          command: |
+            cd build
+            # "-T Test" generates JUnit-style XML by default in Testing/Temporary
+            ctest --output-on-failure -T Test --no-compress-output
+
+      # This tells CircleCI to parse the XML test results and display them under the "Tests" tab
+      - store_test_results:
+          path: build/Testing/Temporary
+
+      - run:
+          name: Collect Coverage
+          command: |
+            cd build
+            # Gather coverage data
+            lcov --capture --directory . --output-file coverage.info
+            # Optional: remove system or test files from coverage
+            # lcov --remove coverage.info '/usr/' 'tests/' --output-file coverage.info
+            lcov --list coverage.info
+
+            # Generate an HTML report
+            mkdir coverage_html
+            genhtml coverage.info --output-directory coverage_html
+
+      # Upload the HTML coverage report to CircleCI Artifacts
+      - store_artifacts:
+          path: build/coverage_html
+          destination: coverage_html
 
 workflows:
-  version: 2
   clang-checks:
     jobs:
       - clang-format-check
       - clang-tidy-check
-      - build-and-compile
-
+      - build-and-test
