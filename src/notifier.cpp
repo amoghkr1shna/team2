@@ -1,6 +1,12 @@
-#include "notifier.h"
-void Notifier::notify(int result, int threshold) {
-    if (result > threshold) {
-        std::cout << "Alert: Result " << result << " exceeds threshold " << threshold << std::endl;
+#include "notifier.hpp"
+
+bool Notifier::shouldNotify(int value) const {
+    return value > threshold_;
+}
+
+std::string Notifier::notifyMessage(int value) const {
+    if (shouldNotify(value)) {
+        return "Threshold exceeded! Value: " + std::to_string(value);
     }
+    return "Value within threshold.";
 }
