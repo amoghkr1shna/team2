@@ -48,7 +48,7 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y build-essential cmake
+            apt update && apt install -y build-essential cmake clang
       - run:
           name: Compile C++ Files
           command: |
