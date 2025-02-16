@@ -62,6 +62,12 @@ jobs:
             cmake -DCMAKE_CXX_FLAGS="--coverage" ..
 
       - run:
+          name: Install Dependencies
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt update && apt install -y clang build-essential cmake lcov
+
+      - run:
           name: Build
           command: |
             cd build
