@@ -1,8 +1,20 @@
 Checks: >
   -*,
+  bugprone-*,
   modernize-*,
   readability-*,
   performance-*,
-  bugprone-*
+  cppcoreguidelines-*,
+  clang-analyzer-*,
+  misc-*
 WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+AnalyzeTemporaryDtors: true
+FormatStyle:     none
+User:            ''
+CheckOptions:
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+  - key:             modernize-use-override.IgnoreDestructors
+    value:           '1'
 
