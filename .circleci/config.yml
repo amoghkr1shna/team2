@@ -48,18 +48,16 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y build-essential cmake
+            apt update && apt install -y build-essential cmake clang
       - run:
-          name: Compile C++ Files
+          name: Compile Components
           command: |
             mkdir -p build
-            for file in $(find . -name "*.cpp"); do
-              filename=$(basename -- "$file")
-              output="build/${filename%.cpp}"
-              clang++ -std=c++17 -Wall -Werror -o "$output" "$file" || exit 1
-            done
+            clang++ -std=c++17 -Wall -Werror -c src/calculator.cpp -o build/calculator.o
+            clang++ -std=c++17 -Wall -Werror -c src/logger.cpp -o build/logger.o
+            clang++ -std=c++17 -Wall -Werror -c src/notifier.cpp -o build/notifier.o
       - run:
-          name: Verify Executables
+          name: Verify Build
           command: ls -l build/
 
 workflows:
