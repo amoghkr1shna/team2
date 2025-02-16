@@ -9,7 +9,6 @@ Checks: >
   misc-*
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-AnalyzeTemporaryDtors: true
 FormatStyle:     none
 User:            ''
 CheckOptions:

@@ -40,10 +40,33 @@ jobs:
               clang-tidy $file -- -std=c++17 || exit 1
             done
 
+  build-and-compile:
+    executor: clang-executor
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt update && apt install -y build-essential cmake
+      - run:
+          name: Compile C++ Files
+          command: |
+            mkdir -p build
+            for file in $(find . -name "*.cpp"); do
+              filename=$(basename -- "$file")
+              output="build/${filename%.cpp}"
+              clang++ -std=c++17 -Wall -Werror -o "$output" "$file" || exit 1
+            done
+      - run:
+          name: Verify Executables
+          command: ls -l build/
+
 workflows:
   version: 2
   clang-checks:
     jobs:
       - clang-format-check
       - clang-tidy-check
+      - build-and-compile
 
