@@ -128,8 +128,8 @@ unit_tests: CMakeFiles/unit_tests.dir/tests/unit/test_logger.cpp.o
 unit_tests: CMakeFiles/unit_tests.dir/tests/unit/test_notifier.cpp.o
 unit_tests: CMakeFiles/unit_tests.dir/build.make
 unit_tests: libmy_code.a
-unit_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/manual-link/libgtest_main.a
-unit_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/libgtest.a
+unit_tests: /opt/homebrew/opt/googletest/lib/libgtest_main.a
+unit_tests: /opt/homebrew/opt/googletest/lib/libgtest.a
 unit_tests: CMakeFiles/unit_tests.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/adithyahnair/Downloads/OSPSD/team2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable unit_tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/unit_tests.dir/link.txt --verbose=$(VERBOSE)

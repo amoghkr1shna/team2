@@ -96,8 +96,8 @@ integration_tests_EXTERNAL_OBJECTS =
 integration_tests: CMakeFiles/integration_tests.dir/tests/integration/test_integration.cpp.o
 integration_tests: CMakeFiles/integration_tests.dir/build.make
 integration_tests: libmy_code.a
-integration_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/manual-link/libgtest_main.a
-integration_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/libgtest.a
+integration_tests: /opt/homebrew/opt/googletest/lib/libgtest_main.a
+integration_tests: /opt/homebrew/opt/googletest/lib/libgtest.a
 integration_tests: CMakeFiles/integration_tests.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/adithyahnair/Downloads/OSPSD/team2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable integration_tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/integration_tests.dir/link.txt --verbose=$(VERBOSE)

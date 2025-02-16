@@ -4,7 +4,7 @@
 # compile CXX with /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/adithyahnair/Downloads/OSPSD/team2/src -isystem /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/include
+CXX_INCLUDES = -I/Users/adithyahnair/Downloads/OSPSD/team2/src -isystem /opt/homebrew/opt/googletest/include
 
 CXX_FLAGSarm64 =  -Wall -Wextra -Wpedantic --coverage -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -mmacosx-version-min=14.5
 

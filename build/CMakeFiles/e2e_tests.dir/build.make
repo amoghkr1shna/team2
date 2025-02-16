@@ -96,8 +96,8 @@ e2e_tests_EXTERNAL_OBJECTS =
 e2e_tests: CMakeFiles/e2e_tests.dir/tests/e2e/test_e2e.cpp.o
 e2e_tests: CMakeFiles/e2e_tests.dir/build.make
 e2e_tests: libmy_code.a
-e2e_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/manual-link/libgtest_main.a
-e2e_tests: /Users/adithyahnair/Downloads/OSPSD/vcpkg/installed/arm64-osx/debug/lib/libgtest.a
+e2e_tests: /opt/homebrew/opt/googletest/lib/libgtest_main.a
+e2e_tests: /opt/homebrew/opt/googletest/lib/libgtest.a
 e2e_tests: CMakeFiles/e2e_tests.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/adithyahnair/Downloads/OSPSD/team2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable e2e_tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/e2e_tests.dir/link.txt --verbose=$(VERBOSE)
