@@ -57,6 +57,20 @@ jobs:
             clang++ -std=c++17 -Wall -Werror -c src/logger.cpp -o build/logger.o
             clang++ -std=c++17 -Wall -Werror -c src/notifier.cpp -o build/notifier.o
       - run:
+          name: Install Google Test
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt update && apt install -y libgtest-dev cmake
+            cd /usr/src/gtest
+            cmake CMakeLists.txt
+            make
+            cp lib/*.a /usr/lib
+            cp -r /usr/src/googletest/googletest/include/gtest /usr/local/include/
+      - run:
+          name: Compile Calculator Unit Test
+          command: |
+            clang++ -std=c++17 -Wall -Werror -lgtest -lgtest_main -pthread -I src/ -I /usr/local/include/ -o build/test_calculator tests/test_calculator.cpp build/calculator.o || exit 1
+      - run:
           name: Verify Build
           command: ls -l build/
 
