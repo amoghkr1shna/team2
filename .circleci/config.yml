@@ -55,6 +55,18 @@ jobs:
             apt update && apt install -y clang build-essential cmake lcov
 
       - run:
+          name: Install vcpkg
+          command: |
+            git clone https://github.com/microsoft/vcpkg.git
+            ./vcpkg/bootstrap-vcpkg.sh
+            ./vcpkg/vcpkg integrate install
+            
+      - run:
+          name: Install Google Test via vcpkg
+          command: |
+            ./vcpkg/vcpkg install gtest --triplet=x64-linux
+
+      - run:
           name: Check Clang++ Installation
           command: |
             which clang++
@@ -65,7 +77,8 @@ jobs:
           command: |
             mkdir build
             cd build
-            cmake -DCMAKE_CXX_FLAGS="--coverage" ..
+            cmake -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+            cd ..
 
       - run:
           name: Build
