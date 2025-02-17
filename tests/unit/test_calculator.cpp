@@ -1,4 +1,4 @@
-#include "../src/calculator.hpp"
+#include "../../src/calculator.hpp"
 #include <gtest/gtest.h>
 
 TEST(CalculatorTests, TestAddition) {

@@ -1,6 +1,6 @@
-#include "../src/calculator.hpp"
-#include "../src/logger.hpp"
-#include "../src/notifier.hpp"
+#include "../../src/calculator.hpp"
+#include "../../src/logger.hpp"
+#include "../../src/notifier.hpp"
 #include <gtest/gtest.h>
 
 // Full scenario: Calculate, log, notify if threshold exceeded
