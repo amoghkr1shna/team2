@@ -2,7 +2,7 @@
 
 class Calculator {
 public:
-    int add(int a, int b);
-    int subtract(int a, int b);
-    int multiply(int a, int b);
+    static auto add(int num1, int num2) -> int;
+    static auto subtract(int num1, int num2) -> int;
+    static auto multiply(int num1, int num2) -> int;
 };
