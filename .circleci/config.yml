@@ -66,6 +66,12 @@ jobs:
           command: |
             ./vcpkg/vcpkg install gtest --triplet=x64-linux
 
+      # Verify Google Test Installation
+      - run:
+          name: Verify Google Test Installation
+          command: |
+            ./vcpkg/vcpkg list | grep gtest
+
       # Check Clang++ installation
       - run:
           name: Check Clang++ Installation
