@@ -8,12 +8,12 @@ constexpr int kMultiplier1 = 5;
 constexpr int kMultiplier2 = 3;
 constexpr int kThreshold = 10;
 
-TEST(EndToEndTests, FullFlow) {
+auto TEST(EndToEndTests, FullFlow) -> void {
   const Calculator calc;
   const Logger logger;
   const Notifier notifier(kThreshold);
 
-  const int result = calc.multiply(kMultiplier1, kMultiplier2); // 15
+  const int result = Calculator::multiply(kMultiplier1, kMultiplier2);
   logger.logOperation("5 * 3", result);
   const bool notify = notifier.shouldNotify(result);
 
