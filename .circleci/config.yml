@@ -5,12 +5,10 @@ executors:
     docker:
       - image: ubuntu:latest
     resource_class: small
-    environment:
-      CC: clang
-      CXX: clang++
+    # Removed environment variables (CC/CXX) to avoid preset values
 
 jobs:
-  # 1) clang-format-check (unchanged)
+  # 1) clang-format-check (unchanged aside from fixing file search pattern)
   clang-format-check:
     executor: clang-executor
     steps:
@@ -23,9 +21,9 @@ jobs:
       - run:
           name: Run clang-format
           command: |
-            find . -name ".c" -o -name ".cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+            find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
-  # 2) clang-tidy-check (unchanged)
+  # 2) clang-tidy-check (unchanged aside from fixing file search pattern)
   clang-tidy-check:
     executor: clang-executor
     steps:
@@ -38,11 +36,11 @@ jobs:
       - run:
           name: Run clang-tidy
           command: |
-            for file in $(find . -name ".c" -o -name ".cpp" -o -name "*.h"); do
+            for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
               clang-tidy "$file" -- -std=c++17 || exit 1
             done
 
-  # 3) build-and-test (replaces your old "build-and-compile" job)
+  # 3) build-and-test
   build-and-test:
     executor: clang-executor
     steps:
@@ -51,54 +49,39 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y \
-              build-essential cmake lcov
-
-      - run:
-          name: CMake Configure (with coverage)
-          command: |
-            mkdir build
-            cd build
-            cmake -DCMAKE_CXX_FLAGS="--coverage" ..
-
-      - run:
-          name: Install Dependencies
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
             apt update && apt install -y clang build-essential cmake lcov
-
+      - run:
+          name: Check Clang++ Installation
+          command: |
+            which clang++
+            clang++ --version
+      - run:
+          name: CMake Configure (with explicit compiler and coverage)
+          command: |
+            mkdir build && cd build
+            cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
       - run:
           name: Build
           command: |
             cd build
             make -j4
-
       - run:
           name: Run Tests (JUnit/XML output)
           command: |
             cd build
-            # "-T Test" generates JUnit-style XML by default in Testing/Temporary
+            # Generate JUnit-style XML test results
             ctest --output-on-failure -T Test --no-compress-output
-
-      # This tells CircleCI to parse the XML test results and display them under the "Tests" tab
       - store_test_results:
           path: build/Testing/Temporary
-
       - run:
           name: Collect Coverage
           command: |
             cd build
-            # Gather coverage data
             lcov --capture --directory . --output-file coverage.info
-            # Optional: remove system or test files from coverage
-            # lcov --remove coverage.info '/usr/' 'tests/' --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' 'tests/*' --output-file coverage.info
             lcov --list coverage.info
-
-            # Generate an HTML report
             mkdir coverage_html
             genhtml coverage.info --output-directory coverage_html
-
-      # Upload the HTML coverage report to CircleCI Artifacts
       - store_artifacts:
           path: build/coverage_html
           destination: coverage_html
