@@ -3,10 +3,11 @@
 
 class Notifier {
 public:
-    Notifier(int threshold) : threshold_(threshold) {}
-    bool shouldNotify(int value) const;
-    std::string notifyMessage(int value) const;
+  Notifier(int threshold) : threshold_(threshold) {}
+
+  [[nodiscard]] auto shouldNotify(int value) const -> bool;
+  [[nodiscard]] auto notifyMessage(int value) const -> std::string;
 
 private:
-    int threshold_;
+  int threshold_;
 };

@@ -1,13 +1,7 @@
 #include "calculator.hpp"
 
-int Calculator::add(int a, int b) {
-    return a + b;
-}
+auto Calculator::add(int num1, int num2) -> int { return num1 + num2; }
 
-int Calculator::subtract(int a, int b) {
-    return a - b;
-}
+auto Calculator::subtract(int num1, int num2) -> int { return num1 - num2; }
 
-int Calculator::multiply(int a, int b) {
-    return a * b;
-}
+auto Calculator::multiply(int num1, int num2) -> int { return num1 * num2; }
