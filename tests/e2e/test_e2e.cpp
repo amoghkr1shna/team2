@@ -9,13 +9,13 @@ constexpr int kMultiplier2 = 3;
 constexpr int kThreshold = 10;
 
 TEST(EndToEndTests, FullFlow) {
-  Calculator calc;
-  Logger logger;
-  Notifier notifier(kThreshold);
+  const Calculator calc;
+  const Logger logger;
+  const Notifier notifier(kThreshold);
 
-  int result = calc.multiply(kMultiplier1, kMultiplier2); // 15
+  const int result = calc.multiply(kMultiplier1, kMultiplier2); // 15
   logger.logOperation("5 * 3", result);
-  bool notify = notifier.shouldNotify(result);
+  const bool notify = notifier.shouldNotify(result);
 
   // Check logs
   auto logs = logger.getLogs();
