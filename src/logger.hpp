@@ -5,7 +5,7 @@
 class Logger {
 public:
     void logOperation(const std::string& operation, int result);
-    const std::vector<std::string>& getLogs() const;
+    [[nodiscard]] auto getLogs() const -> const std::vector<std::string>&;
 
 private:
     std::vector<std::string> logs_;
