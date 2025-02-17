@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 # Option to enable coverage
 option(ENABLE_COVERAGE "Enable coverage flags" ON)
 if(ENABLE_COVERAGE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 endif()
 
 # Enable testing

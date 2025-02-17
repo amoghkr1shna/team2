@@ -52,7 +52,7 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config
+            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
 
       - run:
           name: Install vcpkg
@@ -100,12 +100,13 @@ jobs:
           name: Collect Coverage
           command: |
             cd build
-            lcov --capture --directory . --output-file coverage.info
-            # Optional: filter out system or test files
-            lcov --remove coverage.info '/usr/*' 'tests/*' --output-file coverage.info
-            lcov --list coverage.info
-            mkdir coverage_html
-            genhtml coverage.info --output-directory coverage_html
+            # Generate profraw files during test execution
+            export LLVM_PROFILE_FILE="%p.profraw"
+            ctest --output-on-failure -T Test --no-compress-output
+            # Merge all .profraw files into a single .profdata
+            llvm-profdata merge --sparse *.profraw -o merged.profdata
+            # Generate HTML coverage report for all test executables
+            llvm-cov show ./unit_tests ./integration_tests ./e2e_tests -instr-profile=merged.profdata --format=html -output-dir=coverage_html
 
       - store_artifacts:
           path: build/coverage_html
