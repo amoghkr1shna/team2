@@ -22,7 +22,6 @@ jobs:
       - run:
           name: Run clang-format
           command: |
-            # Fixed the find patterns to use "*.c", "*.cpp", etc.
             find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
   clang-tidy-check:
@@ -37,7 +36,6 @@ jobs:
       - run:
           name: Run clang-tidy
           command: |
-            # Fixed the find patterns here as well
             for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
               clang-tidy "$file" -- -std=c++17 || exit 1
             done
@@ -47,72 +45,78 @@ jobs:
     steps:
       - checkout
 
-      # Install *all* needed dependencies (including clang) *before* configuring CMake
+      # Install dependencies (including clang) and set up the environment
       - run:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
             apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
 
+      # Install vcpkg
       - run:
           name: Install vcpkg
           command: |
             git clone https://github.com/microsoft/vcpkg.git
             ./vcpkg/bootstrap-vcpkg.sh
             ./vcpkg/vcpkg integrate install
-            
+
+      # Install Google Test via vcpkg
       - run:
           name: Install Google Test via vcpkg
           command: |
             ./vcpkg/vcpkg install gtest --triplet=x64-linux
 
+      # Check Clang++ installation
       - run:
           name: Check Clang++ Installation
           command: |
             which clang++
             clang++ --version
 
+      # CMake configuration with the vcpkg toolchain file for dependency management
       - run:
-          name: CMake Configure (with coverage)
+          name: CMake Configure (with vcpkg)
           command: |
             mkdir build
             cd build
-            cmake -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+            cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
             cd ..
 
+      # Build the project
       - run:
           name: Build
           command: |
             cd build
             make -j4
 
+      # Run the tests and generate JUnit output
       - run:
           name: Run Tests (JUnit/XML output)
           command: |
             cd build
-            # Generate JUnit-style XML test results in Testing/Temporary
             ctest --output-on-failure -T Test --no-compress-output
 
+      # Store test results
       - store_test_results:
           path: build/Testing/Temporary
 
+      # Collect coverage (if necessary)
       - run:
           name: Collect Coverage
           command: |
             cd build
-            # Generate profraw files during test execution
             export LLVM_PROFILE_FILE="%p.profraw"
             ctest --output-on-failure -T Test --no-compress-output
-            # Merge all .profraw files into a single .profdata
             llvm-profdata merge --sparse *.profraw -o merged.profdata
-            # Generate HTML coverage report for all test executables
             llvm-cov show ./unit_tests ./integration_tests ./e2e_tests -instr-profile=merged.profdata --format=html -output-dir=coverage_html
 
+      # Store coverage reports
       - store_artifacts:
           path: build/coverage_html
           destination: coverage_html
 
 workflows:
+  version: 2
   clang-checks:
     jobs:
       - clang-format-check
