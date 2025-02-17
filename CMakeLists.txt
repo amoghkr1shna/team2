@@ -28,6 +28,7 @@ endif()
 
 # Find GoogleTest
 find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
 # Unit Tests
 file(GLOB UNIT_TEST_FILES "tests/unit/*.cpp")
