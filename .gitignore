@@ -31,6 +31,8 @@
 *.out
 *.app
 
+# Unnecessary files and folders 
 *.DS_Store
 
+# Build files and folders 
 build/

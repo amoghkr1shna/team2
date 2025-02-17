@@ -127,4 +127,6 @@ workflows:
     jobs:
       - clang-format-check
       - build-and-test
-      - clang-tidy-check
+      - clang-tidy-check:
+          requires:
+            - build-and-test 
