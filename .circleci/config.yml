@@ -40,7 +40,7 @@ jobs:
               clang-tidy $file -- -std=c++17 || exit 1
             done
 
-  build-and-compile:
+  build-and-test:
     executor: clang-executor
     steps:
       - checkout
@@ -50,17 +50,26 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             apt update && apt install -y build-essential cmake
       - run:
-          name: Compile C++ Files
+          name: Configure and Build with Coverage
           command: |
-            mkdir -p build
-            for file in $(find . -name "*.cpp"); do
-              filename=$(basename -- "$file")
-              output="build/${filename%.cpp}"
-              clang++ -std=c++17 -Wall -Werror -o "$output" "$file" || exit 1
-            done
+            mkdir -p build && cd build
+            cmake .. -DCMAKE_CXX_FLAGS="--coverage -O0 -g -fprofile-arcs -ftest-coverage"
+            make
       - run:
-          name: Verify Executables
-          command: ls -l build/
+          name: Run Tests
+          command: |
+            cd build
+            make runTests
+      - run:
+          name: Generate Test Coverage Report
+          command: |
+            cd build
+            lcov --capture --directory . --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' '*/test/*' --output-file coverage_filtered.info
+            genhtml coverage_filtered.info --output-directory coverage_report
+      - store_artifacts:
+          path: build/coverage_report
+          destination: coverage
 
 workflows:
   version: 2
@@ -68,5 +77,5 @@ workflows:
     jobs:
       - clang-format-check
       - clang-tidy-check
-      - build-and-compile
+      - build-and-test
 
