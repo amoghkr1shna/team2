@@ -5,13 +5,11 @@ executors:
     docker:
       - image: ubuntu:latest
     resource_class: small
-    # We remove the preset environment variables so that we install clang first
-    # environment:
-    #   CC: clang
-    #   CXX: clang++
+    environment:
+      CC: clang
+      CXX: clang++
 
 jobs:
-  # 1) clang-format-check job
   clang-format-check:
     executor: clang-executor
     steps:
@@ -20,14 +18,13 @@ jobs:
           name: Install clang-format
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update && apt-get install -y clang-format
+            apt update && apt install -y clang-format
       - run:
-          name: Run clang-format (dry-run, no errors)
+          name: Run clang-format
           command: |
-            # Note: adjust the find pattern as needed.
+            # Fixed the find patterns to use "*.c", "*.cpp", etc.
             find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
-  # 2) clang-tidy-check job
   clang-tidy-check:
     executor: clang-executor
     steps:
@@ -36,64 +33,81 @@ jobs:
           name: Install clang-tidy
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update && apt-get install -y clang-tidy
+            apt update && apt install -y clang-tidy
       - run:
           name: Run clang-tidy
           command: |
+            # Fixed the find patterns here as well
             for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
               clang-tidy "$file" -- -std=c++17 || exit 1
             done
 
-  # 3) build-and-test job
   build-and-test:
     executor: clang-executor
     steps:
       - checkout
+
+      # Install *all* needed dependencies (including clang) *before* configuring CMake
       - run:
-          name: Install Dependencies and Build GTest
+          name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt-get update
-            apt-get install -y clang build-essential cmake lcov libgtest-dev
-            # Build and install GoogleTest libraries:
-            cd /usr/src/gtest
-            cmake .
-            make
-            # Move libraries so that CMake can find them later
-            mv libg* /usr/lib/
+            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
+
+      - run:
+          name: Install vcpkg
+          command: |
+            git clone https://github.com/microsoft/vcpkg.git
+            ./vcpkg/bootstrap-vcpkg.sh
+            ./vcpkg/vcpkg integrate install
+
+      - run:
+          name: Install Google Test via vcpkg
+          command: |
+            ./vcpkg/vcpkg install gtest --triplet=x64-linux
+
       - run:
           name: Check Clang++ Installation
           command: |
             which clang++
             clang++ --version
+
       - run:
           name: CMake Configure (with coverage)
           command: |
-            mkdir build && cd build
-            cmake -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+            mkdir build
+            cd build
+            cmake -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+            cd ..
+
       - run:
-          name: Build Project
+          name: Build
           command: |
             cd build
             make -j4
+
       - run:
           name: Run Tests (JUnit/XML output)
           command: |
             cd build
             # Generate JUnit-style XML test results in Testing/Temporary
             ctest --output-on-failure -T Test --no-compress-output
+
       - store_test_results:
           path: build/Testing/Temporary
+
       - run:
           name: Collect Coverage
           command: |
             cd build
-            lcov --capture --directory . --output-file coverage.info
-            # Optional: Remove system and test files from coverage:
-            lcov --remove coverage.info '/usr/*' 'tests/*' --output-file coverage.info
-            lcov --list coverage.info
-            mkdir coverage_html
-            genhtml coverage.info --output-directory coverage_html
+            # Generate profraw files during test execution
+            export LLVM_PROFILE_FILE="%p.profraw"
+            ctest --output-on-failure -T Test --no-compress-output
+            # Merge all .profraw files into a single .profdata
+            llvm-profdata merge --sparse *.profraw -o merged.profdata
+            # Generate HTML coverage report for all test executables
+            llvm-cov show ./unit_tests ./integration_tests ./e2e_tests -instr-profile=merged.profdata --format=html -output-dir=coverage_html
+
       - store_artifacts:
           path: build/coverage_html
           destination: coverage_html
