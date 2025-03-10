@@ -8,7 +8,6 @@ constexpr int kMultiplier1 = 5;
 constexpr int kMultiplier2 = 3;
 constexpr int kThreshold = 10;
 
-// Fixed the unnamed parameter warnings by naming the parameters in the test case
 TEST(EndToEndTests, FullFlow) {
   const Calculator calc;
   const Logger logger;
