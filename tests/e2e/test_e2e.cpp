@@ -1,21 +1,14 @@
-#include <gtest/gtest.h>
 #include "../../src/calculator.hpp"
 #include "../../src/logger.hpp"
 #include "../../src/notifier.hpp"
+#include <gtest/gtest.h>
 
 // Full scenario: Calculate, log, notify if threshold exceeded
 constexpr int kMultiplier1 = 5;
 constexpr int kMultiplier2 = 3;
 constexpr int kThreshold = 10;
 
-// Define the test fixture class
-class EndToEndTests : public testing::Test {
-protected:
-  void SetUp() override {}
-  void TearDown() override {}
-};
-
-TEST_F(EndToEndTests, FullFlow) {
+TEST(EndToEndTests, FullFlow) {
   const Calculator calc;
   const Logger logger;
   const Notifier notifier(kThreshold);
