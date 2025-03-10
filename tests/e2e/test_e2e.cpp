@@ -8,7 +8,7 @@ constexpr int kMultiplier1 = 5;
 constexpr int kMultiplier2 = 3;
 constexpr int kThreshold = 10;
 
-auto TEST(EndToEndTests, FullFlow) -> void {
+TEST(EndToEndTests, FullFlow) {
   const Calculator calc;
   const Logger logger;
   const Notifier notifier(kThreshold);
