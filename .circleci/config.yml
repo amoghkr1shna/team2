@@ -64,13 +64,11 @@ jobs:
       - run:
           name: Create clang-tidy config
           command: |
-            cat << EOF > .clang-tidy
-            ---
-            Checks: '*,-modernize-use-trailing-return-type,-readability-named-parameter,-fuchsia-*,-google-*,-android-*,-llvm-header-guard'
-            WarningsAsErrors: '*'
-            HeaderFilterRegex: '.*'
-            FormatStyle: none
-            EOF
+            echo "---" > .clang-tidy
+            echo "Checks: '*,-modernize-use-trailing-return-type,-readability-named-parameter,-fuchsia-*,-google-*,-android-*,-llvm-header-guard'" >> .clang-tidy
+            echo "WarningsAsErrors: '*'" >> .clang-tidy
+            echo "HeaderFilterRegex: '.*'" >> .clang-tidy
+            echo "FormatStyle: none" >> .clang-tidy
 
       # Run clang-tidy using the compilation database
       - run:

@@ -1,19 +1,21 @@
+---
 Checks: >
   -*,
   bugprone-*,
-  modernize-*,
-  readability-*,
-  performance-*,
-  cppcoreguidelines-*,
+  cert-*,
   clang-analyzer-*,
-  misc-*
-WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
-FormatStyle:     none
-User:            ''
-CheckOptions:
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             modernize-use-override.IgnoreDestructors
-    value:           '1'
+  cppcoreguidelines-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-named-parameter,
+  -readability-braces-around-statements,
+  -readability-identifier-length,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  -modernize-use-nodiscard
 
+WarningsAsErrors: "*"
+HeaderFilterRegex: ".*"
+FormatStyle: file
