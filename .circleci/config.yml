@@ -36,9 +36,8 @@ jobs:
       - run:
           name: Run clang-tidy
           command: |
-            # Fixed the find patterns here as well
             for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
-              clang-tidy -p build "$file" || exit 1
+              clang-tidy "$file" -- -std=c++17 || exit 1
             done
 
   build-and-test:
@@ -127,5 +126,7 @@ workflows:
   clang-checks:
     jobs:
       - clang-format-check
-      - clang-tidy-check
       - build-and-test
+      - clang-tidy-check:
+          requires:
+            - build-and-test
