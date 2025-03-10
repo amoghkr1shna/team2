@@ -36,12 +36,7 @@ jobs:
       - run:
           name: Run clang-tidy
           command: |
-
-            mkdir build
-            cd build
-            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
-            cd ..
-
+            # Fixed the find patterns here as well
             for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
               clang-tidy -p build "$file" || exit 1
             done
@@ -132,7 +127,5 @@ workflows:
   clang-checks:
     jobs:
       - clang-format-check
+      - clang-tidy-check
       - build-and-test
-      - clang-tidy-check:
-          requires:
-            - build-and-test

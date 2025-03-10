@@ -1,12 +1,13 @@
 #include "notifier.hpp"
+#include <string> // Include for std::string and std::to_string
 
-bool Notifier::shouldNotify(int value) const {
-    return value > threshold_;
+auto Notifier::shouldNotify(int value) const -> bool {
+  return value > threshold_;
 }
 
-std::string Notifier::notifyMessage(int value) const {
-    if (shouldNotify(value)) {
-        return "Threshold exceeded! Value: " + std::to_string(value);
-    }
-    return "Value within threshold.";
+auto Notifier::notifyMessage(int value) const -> std::string {
+  if (shouldNotify(value)) {
+    return "Threshold exceeded! Value: " + std::to_string(value);
+  }
+  return "Value within threshold.";
 }
