@@ -71,6 +71,13 @@ jobs:
           name: Verify Google Test Installation
           command: |
             ./vcpkg/vcpkg list | grep gtest
+            
+      # Debug vcpkg package paths (add this new step here)
+      - run:
+          name: Debug vcpkg package paths
+          command: |
+            ./vcpkg/vcpkg list --x-full-desc
+            find ./vcpkg -name "gtest.h" -type f
 
       # Check Clang++ installation
       - run:
