@@ -45,6 +45,8 @@ target_include_directories(integration_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
 add_test(NAME integration_tests COMMAND integration_tests)
 
 # End-to-End Tests
+include_directories(/usr/local/include)
+target_link_libraries(your_project gtest gtest_main pthread)
 file(GLOB E2E_TEST_FILES "tests/e2e/*.cpp")
 add_executable(e2e_tests ${E2E_TEST_FILES})
 target_link_libraries(e2e_tests PRIVATE my_code GTest::gtest_main)

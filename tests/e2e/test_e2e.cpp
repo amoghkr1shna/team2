@@ -26,3 +26,4 @@ TEST(EndToEndTests, FullFlow) {
   EXPECT_TRUE(notify);
   EXPECT_EQ(notifier.notifyMessage(result), "Threshold exceeded! Value: 15");
 }
+
