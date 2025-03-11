@@ -96,12 +96,12 @@ function(configure_test_target target_name test_sources)
       TIMEOUT 10  # Set timeout for tests
     DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
   )
-endfunction()
 
-# For Clang coverage, set the profile output location
-if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # For Clang coverage, set the profile output location
+  if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set_property(TEST PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/coverage.profraw")
-endif()
+  endif()
+endfunction()
 
 # Unit Tests
 file(GLOB UNIT_TEST_FILES "tests/unit/*.cpp")
