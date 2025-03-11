@@ -25,6 +25,9 @@ endif()
 include(CTest)
 enable_testing()
 
+# Include GoogleTest module - this is critical for gtest_discover_tests
+include(GoogleTest)
+
 # Add your source code
 file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
@@ -79,12 +82,18 @@ function(configure_test_target target_name test_sources)
     CXX_STANDARD_REQUIRED ON
   )
   
-  # This enables CTest integration
-  gtest_discover_tests(${target_name}
-    PROPERTIES
-      TIMEOUT 10  # Set timeout for tests
-    DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
-  )
+  # Alternative approach for older CMake versions
+  if(CMAKE_VERSION VERSION_LESS 3.10)
+    # For older CMake versions without gtest_discover_tests
+    add_test(NAME ${target_name} COMMAND ${target_name})
+  else()
+    # This enables CTest integration
+    gtest_discover_tests(${target_name}
+      PROPERTIES
+        TIMEOUT 10  # Set timeout for tests
+      DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
+    )
+  endif()
 endfunction()
 
 # Unit Tests
