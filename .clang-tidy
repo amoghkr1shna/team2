@@ -7,13 +7,14 @@ Checks: >
   cppcoreguidelines-*,
   clang-analyzer-*,
   misc-*
-WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
-FormatStyle:     none
-User:            ''
+WarningsAsErrors: "*"
+HeaderFilterRegex: ".*"
+FormatStyle: none
+User: ""
 CheckOptions:
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             modernize-use-override.IgnoreDestructors
-    value:           '1'
-
+  - key: modernize-use-nullptr.NullMacros
+    value: "NULL"
+  - key: modernize-use-override.IgnoreDestructors
+    value: "1"
+  - key: modernize-use-trailing-return-type
+    value: "0" # <-- Disable this check

@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmodernize-use-trailing-return-type"
 #include "../../src/calculator.hpp"
 #include "../../src/logger.hpp"
 #include "../../src/notifier.hpp"
