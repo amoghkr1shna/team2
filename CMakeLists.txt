@@ -18,15 +18,8 @@ enable_testing()
 # Include GoogleTest module
 include(GoogleTest)
 
-# Add your source code - consider explicitly listing files instead of GLOB for production
-set(SRC_FILES
-    src/file1.cpp
-    src/file2.cpp
-    # Add more source files here
-)
-# Alternatively, use GLOB for quick prototyping
-# file(GLOB SRC_FILES "src/*.cpp")
-
+# Add your source code
+file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
 target_include_directories(my_code PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src
