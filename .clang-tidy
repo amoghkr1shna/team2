@@ -6,16 +6,15 @@ Checks: >
   performance-*,
   cppcoreguidelines-*,
   clang-analyzer-*,
-  misc-*,
-  -modernize-use-trailing-return-type,
-  -readability-named-parameter
+  misc-*
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-FormatStyle:     none
-User:            ''
+FormatStyle: none
+User: ''
 CheckOptions:
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             modernize-use-override.IgnoreDestructors
-    value:           '1'
-
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL'
+  - key: modernize-use-override.IgnoreDestructors
+    value: '1'
+  - key: system-headers
+    value: 'true'

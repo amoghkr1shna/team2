@@ -29,9 +29,9 @@ file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
 target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# Set the vcpkg toolchain file if using vcpkg
-if(EXISTS "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
-  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake")
+# Ensure vcpkg is used for package management
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 endif()
 
 # Download and set up GoogleTest
