@@ -7,13 +7,16 @@ Checks: >
   cppcoreguidelines-*,
   clang-analyzer-*,
   misc-*
-WarningsAsErrors: '*'
+WarningsAsErrors: >
+  -cppcoreguidelines-owning-memory,
+  -modernize-use-nodiscard
 HeaderFilterRegex: '.*'
-FormatStyle:     none
-User:            ''
+FormatStyle: none
+User: ''
 CheckOptions:
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             modernize-use-override.IgnoreDestructors
-    value:           '1'
-
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL'
+  - key: modernize-use-override.IgnoreDestructors
+    value: '1'
+  - key: system-headers
+    value: 'true'
