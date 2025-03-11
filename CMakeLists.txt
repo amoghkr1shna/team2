@@ -42,16 +42,19 @@ include(GoogleTest)
 file(GLOB UNIT_TEST_FILES "tests/unit/*.cpp")
 add_executable(unit_tests ${UNIT_TEST_FILES})
 target_link_libraries(unit_tests PRIVATE my_code gtest_main)
+target_include_directories(unit_tests PRIVATE ${gtest_SOURCE_DIR}/include)
 gtest_discover_tests(unit_tests)
 
 # Integration Tests
 file(GLOB INT_TEST_FILES "tests/integration/*.cpp")
 add_executable(integration_tests ${INT_TEST_FILES})
 target_link_libraries(integration_tests PRIVATE my_code gtest_main)
+target_include_directories(integration_tests PRIVATE ${gtest_SOURCE_DIR}/include)
 gtest_discover_tests(integration_tests)
 
 # End-to-End Tests
 file(GLOB E2E_TEST_FILES "tests/e2e/*.cpp")
 add_executable(e2e_tests ${E2E_TEST_FILES})
 target_link_libraries(e2e_tests PRIVATE my_code gtest_main)
+target_include_directories(e2e_tests PRIVATE ${gtest_SOURCE_DIR}/include)
 gtest_discover_tests(e2e_tests)
