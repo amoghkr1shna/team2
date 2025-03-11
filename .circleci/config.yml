@@ -45,8 +45,7 @@ jobs:
           command: |
             for file in $(find . -name "*.cpp" -o -name "*.h"); do
               echo "Checking $file..."
-              clang-tidy -p=. "$file" -- -I. -Isrc -Ibuild/_deps/googletest-src/googletest/include \
-                --stdlib=libstdc++ -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 || exit 1
+              clang-tidy -p=. "$file" -checks=-*,bugprone-*,performance-*,readability-* -- -std=c++17 -xc++ || exit 1
             done
 
   build-and-test:
