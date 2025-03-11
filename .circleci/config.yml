@@ -32,7 +32,7 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang clang-tidy build-essential cmake git libstdc++-12-dev
+            apt update && apt install -y clang clang-tidy build-essential cmake git libstdc++-13-dev
       - run:
           name: Generate compile_commands.json
           command: |
@@ -46,7 +46,7 @@ jobs:
             for file in $(find . -name "*.cpp" -o -name "*.h"); do
               echo "Checking $file..."
               clang-tidy -p=. "$file" -- -I. -Isrc -Ibuild/_deps/googletest-src/googletest/include \
-                --stdlib=libstdc++ -I/usr/include/c++/12 -I/usr/include/x86_64-linux-gnu/c++/12 || exit 1
+                --stdlib=libstdc++ -I/usr/include/c++/13 -I/usr/include/x86_64-linux-gnu/c++/13 || exit 1
             done
 
   build-and-test:
@@ -57,7 +57,7 @@ jobs:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm libstdc++-12-dev
+            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm libstdc++-13-dev
       - run:
           name: Check Clang++ Installation
           command: |
