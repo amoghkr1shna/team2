@@ -3,8 +3,8 @@ project(MyCppTemplate LANGUAGES CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Use C++17
-set(CMAKE_CXX_STANDARD 17)
+# Use C++14
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -70,7 +70,7 @@ function(configure_test_target target_name test_sources)
   
   # Set properties for better test discovery
   set_target_properties(${target_name} PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
   )
   
