@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Basic compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -stdlib=libstdc++ -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 # Option to enable coverage
 option(ENABLE_COVERAGE "Enable coverage flags" ON)
@@ -25,10 +25,7 @@ endif()
 include(CTest)
 enable_testing()
 
-# Include GoogleTest module
-include(GoogleTest)
-
-# Add your source code
+# Add source code
 file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
 target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -43,13 +40,14 @@ FetchContent_Declare(
 
 # Make GoogleTest available
 FetchContent_MakeAvailable(googletest)
+include(GoogleTest)
 
 # Custom target to copy compile_commands.json to project root
 add_custom_target(copy-compile-commands ALL
-  ${CMAKE_COMMAND} -E copy_if_different
-  ${CMAKE_BINARY_DIR}/compile_commands.json
-  ${CMAKE_SOURCE_DIR}/compile_commands.json
-  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_SOURCE_DIR}/compile_commands.json
+  BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
   COMMENT "Copying compile_commands.json to source directory"
 )
 
@@ -74,18 +72,12 @@ function(configure_test_target target_name test_sources)
     CXX_STANDARD_REQUIRED ON
   )
   
-  # Alternative approach for older CMake versions
-  if(CMAKE_VERSION VERSION_LESS 3.10)
-    # For older CMake versions without gtest_discover_tests
-    add_test(NAME ${target_name} COMMAND ${target_name})
-  else()
-    # This enables CTest integration
-    gtest_discover_tests(${target_name}
-      PROPERTIES
-        TIMEOUT 10  # Set timeout for tests
-      DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
-    )
-  endif()
+  # Use gtest_discover_tests for all CMake versions that support it
+  gtest_discover_tests(${target_name}
+    PROPERTIES
+      TIMEOUT 10  # Set timeout for tests
+    DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
+  )
 endfunction()
 
 # Unit Tests
