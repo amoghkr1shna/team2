@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Basic compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -stdlib=libstdc++ -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11")
 
 # Option to enable coverage
 option(ENABLE_COVERAGE "Enable coverage flags" ON)
@@ -25,15 +25,13 @@ endif()
 include(CTest)
 enable_testing()
 
-# Include GoogleTest module - this is critical for gtest_discover_tests
+# Include GoogleTest module
 include(GoogleTest)
 
 # Add your source code
 file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
-target_include_directories(my_code PUBLIC 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
+target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Include GoogleTest
 include(FetchContent)
@@ -42,12 +40,6 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG        v1.14.0
 )
-
-# Print less noise during the build
-set(FETCHCONTENT_QUIET OFF)
-
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # Make GoogleTest available
 FetchContent_MakeAvailable(googletest)
