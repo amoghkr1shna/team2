@@ -106,9 +106,21 @@ jobs:
           name: Collect Coverage
           command: |
             cd build
-            export LLVM_PROFILE_FILE="%p.profraw"
-            ctest --output-on-failure -T Test --no-compress-output
-            llvm-profdata merge --sparse *.profraw -o merged.profdata
+            # Set the profile output directory
+            mkdir -p coverage_data
+            
+            # Run the test executables directly with proper environment variable
+            LLVM_PROFILE_FILE="coverage_data/%p.profraw" ./unit_tests
+            LLVM_PROFILE_FILE="coverage_data/%p.profraw" ./integration_tests
+            LLVM_PROFILE_FILE="coverage_data/%p.profraw" ./e2e_tests
+            
+            # Verify profraw files were generated
+            ls -la coverage_data/
+            
+            # Merge the profraw files
+            llvm-profdata merge --sparse coverage_data/*.profraw -o merged.profdata
+            
+            # Generate HTML coverage report
             llvm-cov show ./unit_tests ./integration_tests ./e2e_tests -instr-profile=merged.profdata --format=html -output-dir=coverage_html
       
       # Store coverage reports
