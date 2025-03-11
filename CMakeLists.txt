@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(MyCppTemplate LANGUAGES CXX)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Use C++17
@@ -29,60 +30,63 @@ file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
 target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-# GoogleTest setup - The proper way
-# First, set policy to avoid unnecessary warnings
-if(POLICY CMP0135)
-  cmake_policy(SET CMP0135 NEW)
-endif()
-
-# Include GoogleTest directly
+# Choose one approach - in this case we'll use FetchContent as it's more integrated with CMake
+# Include GoogleTest
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
 )
 
-# GoogleTest's CMake setup provides proper targets and includes
+# Print less noise during the build
+set(FETCHCONTENT_QUIET OFF)
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Make GoogleTest available
 FetchContent_MakeAvailable(googletest)
 
-# For debugging, print the directories
-get_target_property(GTEST_INCLUDE_DIRS GTest::gtest INTERFACE_INCLUDE_DIRECTORIES)
-message(STATUS "GoogleTest include directories: ${GTEST_INCLUDE_DIRS}")
+# Add googletest directly to our build
+include(GoogleTest)
 
-# Create a common test setup function
-function(setup_test TEST_NAME TEST_SOURCES)
-  add_executable(${TEST_NAME} ${TEST_SOURCES})
-  target_link_libraries(${TEST_NAME} PRIVATE
+# Helper function to create and configure test targets
+function(configure_test_target target_name test_sources)
+  add_executable(${target_name} ${test_sources})
+  
+  target_link_libraries(${target_name} PRIVATE 
     my_code
-    GTest::gtest_main
-  )
-  # GTest::gtest_main already brings in the correct include paths
-  
-  # For clang-tidy to find headers, add explicit include path
-  target_include_directories(${TEST_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    gtest_main
   )
   
-  # Set up test discovery
-  gtest_discover_tests(${TEST_NAME}
+  # Set properties for better test discovery
+  set_target_properties(${target_name} PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+  )
+  
+  # This enables CTest integration
+  gtest_discover_tests(${target_name}
     PROPERTIES
-      ENVIRONMENT "PATH=$ENV{PATH}"
+      TIMEOUT 10  # Set timeout for tests
+    DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
   )
 endfunction()
 
 # Unit Tests
 file(GLOB UNIT_TEST_FILES "tests/unit/*.cpp")
-setup_test(unit_tests "${UNIT_TEST_FILES}")
+configure_test_target(unit_tests "${UNIT_TEST_FILES}")
 
 # Integration Tests
 file(GLOB INT_TEST_FILES "tests/integration/*.cpp")
-setup_test(integration_tests "${INT_TEST_FILES}")
+configure_test_target(integration_tests "${INT_TEST_FILES}")
 
 # End-to-End Tests
 file(GLOB E2E_TEST_FILES "tests/e2e/*.cpp")
-setup_test(e2e_tests "${E2E_TEST_FILES}")
+configure_test_target(e2e_tests "${E2E_TEST_FILES}")
 
-# Print build configuration for debugging
+# Print final configuration for debugging
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
+message(STATUS "GoogleTest source directory: ${googletest_SOURCE_DIR}")
