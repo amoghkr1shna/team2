@@ -18,7 +18,7 @@ enable_testing()
 # Include GoogleTest module
 include(GoogleTest)
 
-# Add source code
+# Added source code
 file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
 target_include_directories(my_code PUBLIC 
@@ -96,11 +96,6 @@ function(configure_test_target target_name test_sources)
       TIMEOUT 10  # Set timeout for tests
     DISCOVERY_TIMEOUT 20  # Set timeout for test discovery
   )
-
-  # For Clang coverage, set the profile output location
-  if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set_property(TEST PROPERTY ENVIRONMENT "LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/coverage.profraw")
-  endif()
 endfunction()
 
 # Unit Tests
