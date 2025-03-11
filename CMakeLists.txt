@@ -28,9 +28,10 @@ enable_testing()
 # Add your source code
 file(GLOB SRC_FILES "src/*.cpp")
 add_library(my_code ${SRC_FILES})
-target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(my_code PUBLIC 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
-# Choose one approach - in this case we'll use FetchContent as it's more integrated with CMake
 # Include GoogleTest
 include(FetchContent)
 FetchContent_Declare(
@@ -48,8 +49,14 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Make GoogleTest available
 FetchContent_MakeAvailable(googletest)
 
-# Add googletest directly to our build
-include(GoogleTest)
+# Custom target to copy compile_commands.json to project root
+add_custom_target(copy-compile-commands ALL
+  ${CMAKE_COMMAND} -E copy_if_different
+  ${CMAKE_BINARY_DIR}/compile_commands.json
+  ${CMAKE_SOURCE_DIR}/compile_commands.json
+  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+  COMMENT "Copying compile_commands.json to source directory"
+)
 
 # Helper function to create and configure test targets
 function(configure_test_target target_name test_sources)
@@ -58,6 +65,12 @@ function(configure_test_target target_name test_sources)
   target_link_libraries(${target_name} PRIVATE 
     my_code
     gtest_main
+  )
+  
+  # Make include paths explicit for tests
+  target_include_directories(${target_name} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${googletest_SOURCE_DIR}/googletest/include
   )
   
   # Set properties for better test discovery
@@ -90,3 +103,4 @@ configure_test_target(e2e_tests "${E2E_TEST_FILES}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
 message(STATUS "GoogleTest source directory: ${googletest_SOURCE_DIR}")
+message(STATUS "GoogleTest include directory: ${googletest_SOURCE_DIR}/googletest/include")

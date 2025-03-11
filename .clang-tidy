@@ -1,20 +1,20 @@
 Checks: >
-  -*,
+  -*, 
   bugprone-*,
   modernize-*,
   readability-*,
   performance-*,
   cppcoreguidelines-*,
   clang-analyzer-*,
-  misc-*
+  misc-*,
+  -modernize-use-trailing-return-type,
+  -readability-named-parameter
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
-FormatStyle: none
+FormatStyle: file
 User: ''
 CheckOptions:
   - key: modernize-use-nullptr.NullMacros
     value: 'NULL'
   - key: modernize-use-override.IgnoreDestructors
     value: '1'
-  - key: system-headers
-    value: 'true'
