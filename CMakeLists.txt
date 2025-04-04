@@ -65,6 +65,7 @@ function(configure_test_target target_name test_sources)
   # Make include paths explicit for tests
   target_include_directories(${target_name} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${googletest_SOURCE_DIR}
     ${googletest_SOURCE_DIR}/googletest/include
   )
   
