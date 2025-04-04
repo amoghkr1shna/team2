@@ -10,6 +10,9 @@ executors:
       CXX: clang++
 
 jobs:
+  # ----------------------------------------------------------------------------
+  # 1) Clang-format check job
+  # ----------------------------------------------------------------------------
   clang-format-check:
     executor: clang-executor
     steps:
@@ -18,12 +21,18 @@ jobs:
           name: Install clang-format
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang-format
+            apt-get update
+            apt-get install -y clang-format
       - run:
           name: Run clang-format
           command: |
-            find . -name "*.c" -o -name "*.cpp" -o -name "*.h" | xargs clang-format --dry-run --Werror
+            # Fail if any .c/.cpp/.h file is not formatted
+            find . -name "*.c" -o -name "*.cpp" -o -name "*.h" \
+              | xargs clang-format --dry-run --Werror
 
+  # ----------------------------------------------------------------------------
+  # 2) Clang-tidy check job
+  # ----------------------------------------------------------------------------
   clang-tidy-check:
     executor: clang-executor
     steps:
@@ -32,7 +41,8 @@ jobs:
           name: Install clang-tidy
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang-tidy
+            apt-get update
+            apt-get install -y clang-tidy
       - run:
           name: Run clang-tidy
           command: |
@@ -40,17 +50,21 @@ jobs:
               clang-tidy "$file" -- -std=c++17 || exit 1
             done
 
+  # ----------------------------------------------------------------------------
+  # 3) Build-and-test job (with gcov coverage)
+  # ----------------------------------------------------------------------------
   build-and-test:
     executor: clang-executor
     steps:
       - checkout
 
-      # Install dependencies (including clang) and set up the environment
+      # Install dependencies, including build-essential, cmake, and lcov
       - run:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
+            apt-get update
+            apt-get install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
 
       # Install vcpkg
       - run:
@@ -79,13 +93,18 @@ jobs:
             which clang++
             clang++ --version
 
-      # CMake configuration with the vcpkg toolchain file for dependency management
+      # CMake configuration, enabling coverage flags
+      # Note: We explicitly set CFLAGS/CXXFLAGS with coverage flags
       - run:
-          name: CMake Configure (with vcpkg)
+          name: CMake Configure (with vcpkg, coverage flags)
           command: |
             mkdir build
             cd build
-            cmake -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+            cmake \
+              -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
+              -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage" \
+              -DCMAKE_CXX_FLAGS="-fprofile-arcs -ftest-coverage" \
+              ..
             cd ..
 
       # Build the project
@@ -95,28 +114,34 @@ jobs:
             cd build
             make -j4
 
-      # Run the tests and generate JUnit output
+      # Run the tests (produces .gcda files)
       - run:
           name: Run Tests (JUnit/XML output)
           command: |
             cd build
             ctest --output-on-failure -T Test --no-compress-output
 
-      # Store test results
+      # Store test results (JUnit XML)
       - store_test_results:
           path: build/Testing/Temporary
 
-      # Collect coverage (if necessary)
+      # --------------------------------------------------------------------
+      # Coverage Gathering with gcov/lcov
+      # --------------------------------------------------------------------
       - run:
-          name: Collect Coverage
+          name: Collect Coverage with lcov
           command: |
             cd build
-            export LLVM_PROFILE_FILE="%p.profraw"
-            ctest --output-on-failure -T Test --no-compress-output
-            llvm-profdata merge --sparse *.profraw -o merged.profdata
-            llvm-cov show ./unit_tests ./integration_tests ./e2e_tests -instr-profile=merged.profdata --format=html -output-dir=coverage_html
+            # Collect all coverage data (gcda/gcno files) into coverage.info
+            lcov --capture --directory . --output-file coverage.info
 
-      # Store coverage reports
+            # (Optional) Remove external or system paths from coverage
+            # lcov --remove coverage.info "/usr/*" "*vcpkg*" "*tests*" --output-file coverage.info
+
+            # Generate HTML report in 'coverage_html' directory
+            genhtml coverage.info --output-directory coverage_html
+
+      # Store coverage artifacts (HTML report)
       - store_artifacts:
           path: build/coverage_html
           destination: coverage_html
@@ -129,4 +154,4 @@ workflows:
       - build-and-test
       - clang-tidy-check:
           requires:
-            - build-and-test 
+            - build-and-test
