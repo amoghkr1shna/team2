@@ -36,3 +36,4 @@
 
 # Build files and folders 
 build/
+.vscode/

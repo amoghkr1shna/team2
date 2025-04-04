@@ -25,9 +25,11 @@ endif()
 include(CTest)
 enable_testing()
 
-# Add source code
-file(GLOB SRC_FILES "src/*.cpp")
+# Collect source files
+file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
 add_library(my_code ${SRC_FILES})
+
+# Include directories
 target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Include GoogleTest
@@ -81,7 +83,7 @@ function(configure_test_target target_name test_sources)
 endfunction()
 
 # Unit Tests
-file(GLOB UNIT_TEST_FILES "tests/unit/*.cpp")
+file(GLOB UNIT_TEST_FILES "src/*/test_*.cpp")
 configure_test_target(unit_tests "${UNIT_TEST_FILES}")
 
 # Integration Tests
