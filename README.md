@@ -53,9 +53,6 @@ cd vcpkg
 
 #### macOS (Homebrew example)
 
-```
-```bash
-Copy
 sudo apt-get update
 sudo apt-get install -y clang cmake build-essential lcov
 # For vcpkg:
