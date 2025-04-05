@@ -25,12 +25,32 @@ endif()
 include(CTest)
 enable_testing()
 
-# Collect source files
-file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+# Collect all .cpp files excluding tests
+file(GLOB_RECURSE ALL_SRC_FILES CONFIGURE_DEPENDS "src/*/*.cpp")
+
+# Filter out test files
+set(SRC_FILES "")
+foreach(file ${ALL_SRC_FILES})
+  if(NOT file MATCHES "/test/")
+    list(APPEND SRC_FILES ${file})
+  endif()
+endforeach()
+
+# Collect include directories from src/*/include
+file(GLOB_RECURSE INCLUDE_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*/include/*.hpp")
+
+set(ALL_INCLUDES "")
+foreach(header ${INCLUDE_HEADERS})
+  get_filename_component(dir ${header} DIRECTORY)
+  list(APPEND ALL_INCLUDES ${dir})
+endforeach()
+list(REMOVE_DUPLICATES ALL_INCLUDES)
+
+# Add the main library
 add_library(my_code ${SRC_FILES})
 
-# Include directories
-target_include_directories(my_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# Add include directories to the library
+target_include_directories(my_code PUBLIC ${ALL_INCLUDES})
 
 # Include GoogleTest
 include(FetchContent)
@@ -44,19 +64,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
-# Custom target to copy compile_commands.json to project root
-add_custom_target(copy-compile-commands ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_BINARY_DIR}/compile_commands.json
-    ${CMAKE_SOURCE_DIR}/compile_commands.json
-  BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
-  COMMENT "Copying compile_commands.json to source directory"
-)
-
-# Helper function to create and configure test targets
+# Function to configure test targets
 function(configure_test_target target_name test_sources)
   add_executable(${target_name} ${test_sources})
-  
+
   target_link_libraries(${target_name} PRIVATE 
     my_code
     gtest_main
@@ -64,7 +75,7 @@ function(configure_test_target target_name test_sources)
   
   # Make include paths explicit for tests
   target_include_directories(${target_name} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${ALL_INCLUDES}
     ${googletest_SOURCE_DIR}
     ${googletest_SOURCE_DIR}/googletest/include
   )
@@ -84,19 +95,29 @@ function(configure_test_target target_name test_sources)
 endfunction()
 
 # Unit Tests
-file(GLOB UNIT_TEST_FILES "src/*/test_*.cpp")
+file(GLOB_RECURSE UNIT_TEST_FILES CONFIGURE_DEPENDS "src/*/test/test_*.cpp")
 configure_test_target(unit_tests "${UNIT_TEST_FILES}")
 
 # Integration Tests
-file(GLOB INT_TEST_FILES "tests/integration/*.cpp")
-configure_test_target(integration_tests "${INT_TEST_FILES}")
+file(GLOB INTEGRATION_TEST_FILES CONFIGURE_DEPENDS "tests/integration/*.cpp")
+configure_test_target(integration_tests "${INTEGRATION_TEST_FILES}")
 
 # End-to-End Tests
-file(GLOB E2E_TEST_FILES "tests/e2e/*.cpp")
+file(GLOB E2E_TEST_FILES CONFIGURE_DEPENDS "tests/e2e/*.cpp")
 configure_test_target(e2e_tests "${E2E_TEST_FILES}")
 
-# Print final configuration for debugging
+# Copy compile_commands.json to project root
+add_custom_target(copy-compile-commands ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_SOURCE_DIR}/compile_commands.json
+  BYPRODUCTS ${CMAKE_SOURCE_DIR}/compile_commands.json
+  COMMENT "Copying compile_commands.json to source directory"
+)
+
+# Debug info
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS}")
-message(STATUS "GoogleTest source directory: ${googletest_SOURCE_DIR}")
-message(STATUS "GoogleTest include directory: ${googletest_SOURCE_DIR}/googletest/include")
+message(STATUS "GoogleTest source dir: ${googletest_SOURCE_DIR}")
+message(STATUS "GoogleTest include: ${googletest_SOURCE_DIR}/googletest/include")
+message(STATUS "Project include directories: ${ALL_INCLUDES}")

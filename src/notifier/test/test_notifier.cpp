@@ -1,4 +1,4 @@
-#include "include/notifier.hpp"
+#include "notifier.hpp"
 #include <gtest/gtest.h>
 
 TEST(NotifierTests, TestThresholdNotExceeded) {
