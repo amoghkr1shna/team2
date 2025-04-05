@@ -75,6 +75,8 @@ cd vcpkg
 A CircleCI account connected to your GitHub (or GitLab) repository.
 (Optional) A GitHub repository with a .circleci/config.yml file in the root.
 
+---
+
 ## Getting Started
 
 ### Clone this repository:
@@ -147,6 +149,8 @@ lcov --remove coverage.info '/usr/_' 'tests/_' --output-file coverage.info
 genhtml coverage.info --output-directory coverage_html
 open coverage_html/index.html
 ```
+---
+
 ## Style & Static Analysis
 ### clang-format
 A .clang-format file is included. To auto-format your code:
@@ -166,6 +170,8 @@ clang-tidy -p build <file> -- -std=c++17
 
 If certain rules are too strict (e.g., trailing return types or short parameter names), adjust the checks in the .clang-tidy file or fix your code accordingly.
 
+---
+
 ## Continuous Integration (CircleCI)
 The repository includes a CircleCI configuration (.circleci/config.yml) that:
 
@@ -180,6 +186,8 @@ The repository includes a CircleCI configuration (.circleci/config.yml) that:
 - CircleCI will automatically trigger a build.
 - Checks the Tests tab for test results.
 - Checks the Artifacts tab for the coverage report (in the coverage_html folder).
+
+---
 
 ## Issue & PR Templates
 This repository contains preconfigured templates for issues and pull requests:
