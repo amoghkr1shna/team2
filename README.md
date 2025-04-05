@@ -31,6 +31,8 @@ Welcome to the **C++ Template Repository**! This project provides a quick-start 
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/amoghkr1shna/team2/tree/hw1.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/amoghkr1shna/team2/tree/hw1)
 
+---
+
 ## Prerequisites
 
 ### Local Development
