@@ -1,7 +1,7 @@
-#include "../../src/calculator.hpp"
-#include "../../src/logger.hpp"
-#include "../../src/notifier.hpp"
-#include <gtest/gtest.h>
+#include "calculator.hpp"
+#include "logger.hpp"
+#include "notifier.hpp"
+#include "gtest/gtest.h"
 
 // Full scenario: Calculate, log, notify if threshold exceeded
 constexpr int kMultiplier1 = 5;
@@ -25,4 +25,5 @@ TEST(EndToEndTests, FullFlow) {
   // Check notifier
   EXPECT_TRUE(notify);
   EXPECT_EQ(notifier.notifyMessage(result), "Threshold exceeded! Value: 15");
+  return;
 }

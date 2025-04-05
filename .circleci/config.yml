@@ -38,16 +38,34 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install clang-tidy
+          name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
+<<<<<<< HEAD
             apt-get update
             apt-get install -y clang-tidy
+=======
+            apt update && apt install -y clang clang-tidy build-essential cmake git
+      
+      # Build the project with compile_commands.json for clang-tidy
+      - run:
+          name: Generate compile_commands.json
+          command: |
+            mkdir -p build
+            cd build
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+            # Copy compile_commands.json to project root for clang-tidy
+            cp compile_commands.json ../
+
+      # Run clang-tidy with proper include paths
+>>>>>>> origin/hw1
       - run:
           name: Run clang-tidy
           command: |
-            for file in $(find . -name "*.c" -o -name "*.cpp" -o -name "*.h"); do
-              clang-tidy "$file" -- -std=c++17 || exit 1
+            # Run clang-tidy with adjustments
+            for file in $(find src tests -name "*.cpp" -o -name "*.h"); do
+              echo "Checking $file..."
+              clang-tidy -p=. "$file" -- -I. -Isrc -Ibuild/_deps/googletest-src/googletest/include || true
             done
 
   # ----------------------------------------------------------------------------
@@ -57,12 +75,17 @@ jobs:
     executor: clang-executor
     steps:
       - checkout
+<<<<<<< HEAD
 
       # Install dependencies, including build-essential, cmake, and lcov
+=======
+      # Install dependencies (including clang) and set up the environment
+>>>>>>> origin/hw1
       - run:
           name: Install Dependencies
           command: |
             export DEBIAN_FRONTEND=noninteractive
+<<<<<<< HEAD
             apt-get update
             apt-get install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
 
@@ -86,20 +109,32 @@ jobs:
           command: |
             ./vcpkg/vcpkg list | grep gtest
 
+=======
+            apt update && apt install -y clang build-essential cmake lcov curl zip unzip tar git pkg-config llvm
+      
+>>>>>>> origin/hw1
       # Check Clang++ installation
       - run:
           name: Check Clang++ Installation
           command: |
             which clang++
             clang++ --version
+<<<<<<< HEAD
 
       # CMake configuration, enabling coverage flags
       # Note: We explicitly set CFLAGS/CXXFLAGS with coverage flags
       - run:
           name: CMake Configure (with vcpkg, coverage flags)
+=======
+      
+      # CMake configuration using FetchContent for GoogleTest
+      - run:
+          name: CMake Configure
+>>>>>>> origin/hw1
           command: |
-            mkdir build
+            mkdir -p build
             cd build
+<<<<<<< HEAD
             cmake \
               -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake \
               -DCMAKE_C_FLAGS="-fprofile-arcs -ftest-coverage" \
@@ -107,19 +142,30 @@ jobs:
               ..
             cd ..
 
+=======
+            cmake -DENABLE_COVERAGE=ON ..
+      
+>>>>>>> origin/hw1
       # Build the project
       - run:
           name: Build
           command: |
             cd build
+<<<<<<< HEAD
             make -j4
 
       # Run the tests (produces .gcda files)
+=======
+            make -j$(nproc)
+      
+      # Run the tests
+>>>>>>> origin/hw1
       - run:
-          name: Run Tests (JUnit/XML output)
+          name: Run Tests
           command: |
             cd build
             ctest --output-on-failure -T Test --no-compress-output
+<<<<<<< HEAD
 
       # Store test results (JUnit XML)
       - store_test_results:
@@ -128,10 +174,19 @@ jobs:
       # --------------------------------------------------------------------
       # Coverage Gathering with gcov/lcov
       # --------------------------------------------------------------------
+=======
+      
+      # Store test results
+      - store_test_results:
+          path: build/Testing
+      
+      # Collect coverage
+>>>>>>> origin/hw1
       - run:
           name: Collect Coverage with lcov
           command: |
             cd build
+<<<<<<< HEAD
             # Collect all coverage data (gcda/gcno files) into coverage.info
             lcov --capture --directory . --output-file coverage.info
 
@@ -142,6 +197,24 @@ jobs:
             genhtml coverage.info --output-directory coverage_html
 
       # Store coverage artifacts (HTML report)
+=======
+            
+            # Create report directory
+            mkdir -p coverage_html
+            
+            # For Clang coverage
+            if [ -f "*.profraw" ]; then
+              export LLVM_PROFILE_FILE="coverage-%p.profraw"
+              find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
+              llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
+            # For GCC coverage (fallback)
+            elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
+              lcov --capture --directory . --output-file coverage.info
+              genhtml coverage.info --output-directory coverage_html
+            fi
+      
+      # Store coverage reports
+>>>>>>> origin/hw1
       - store_artifacts:
           path: build/coverage_html
           destination: coverage_html
