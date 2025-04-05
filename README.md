@@ -45,7 +45,6 @@ Welcome to the **C++ Template Repository**! This project provides a quick-start 
 
 ##### macOS (Homebrew example)
 
-
 ```bash
 # Install CMake, LLVM, and GoogleTest
 brew install cmake llvm googletest
@@ -60,10 +59,7 @@ cd vcpkg
 
 ##### Ubuntu (apt-get example)
 
-<<<<<<< HEAD
-=======
 ```bash
->>>>>>> origin/hw1
 sudo apt-get update
 sudo apt-get install -y clang cmake build-essential lcov
 # For vcpkg:
@@ -73,20 +69,16 @@ cd vcpkg
 ./vcpkg integrate install
 ./vcpkg install gtest
 ```
+
 #### Continuous Integration
 
 A CircleCI account connected to your GitHub (or GitLab) repository.
 (Optional) A GitHub repository with a .circleci/config.yml file in the root.
 
-<<<<<<< HEAD
-## Getting Started
-
-=======
 ---
 
 ## Getting Started
 
->>>>>>> origin/hw1
 ### Clone this repository:
 
 ```bash
@@ -108,10 +100,8 @@ Ensure clang-format and clang-tidy are installed for local checks.
 ```bash
 cmake -B build -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
-<<<<<<< HEAD
-=======
+
 ---
->>>>>>> origin/hw1
 
 ## Building
 
@@ -128,67 +118,47 @@ make -j4
 The `--coverage` flag is optional and adds instrumentation for coverage analysis.
 Adjust paths if your vcpkg folder is elsewhere or if you are not using vcpkg.
 
-<<<<<<< HEAD
-## Testing
-Run tests using CTest:
-
-```bash
-cd build
-ctest --output-on-failure
-```
-
-=======
 ---
 
 ## Testing
 
->>>>>>> origin/hw1
 Tests are organized as:
 
 Unit tests (e.g., unit_tests executable)
 Integration tests (e.g., integration_tests)
 End-to-End tests (e.g., e2e_tests)
 
-<<<<<<< HEAD
-=======
 ---
 
->>>>>>> origin/hw1
 ## Coverage
+
 This repository supports coverage using either LLVM or lcov/gcov.
 
 ### LLVM Coverage Example
 
 Build with coverage flags.
 Run tests to generate .profraw files:
+
 ```bash
 export LLVM_PROFILE_FILE="%p.profraw"
 ctest --output-on-failure
 ```
-<<<<<<< HEAD
-
-### lcov/gcov Coverage Example
-
-Build with coverage flags.
-Run tests (ctest).
-=======
-
->>>>>>> origin/hw1
 
 ### Collect coverage:
+
 ```bash
 lcov --capture --directory . --output-file coverage.info
 lcov --remove coverage.info '/usr/_' 'tests/_' --output-file coverage.info
 genhtml coverage.info --output-directory coverage_html
 open coverage_html/index.html
 ```
-<<<<<<< HEAD
-=======
+
 ---
 
->>>>>>> origin/hw1
 ## Style & Static Analysis
+
 ### clang-format
+
 A .clang-format file is included. To auto-format your code:
 
 ```bash
@@ -198,6 +168,7 @@ clang-format -i src/_.cpp src/_.hpp tests/\*_/_.cpp
 In CI, a dry-run with --Werror ensures that code must adhere to the formatting rules.
 
 ### clang-tidy
+
 A .clang-tidy file is provided, which includes checks like modernize-_ and readability-_. Run clang-tidy as follows:
 
 ```bash
@@ -206,12 +177,10 @@ clang-tidy -p build <file> -- -std=c++17
 
 If certain rules are too strict (e.g., trailing return types or short parameter names), adjust the checks in the .clang-tidy file or fix your code accordingly.
 
-<<<<<<< HEAD
-=======
 ---
 
->>>>>>> origin/hw1
 ## Continuous Integration (CircleCI)
+
 The repository includes a CircleCI configuration (.circleci/config.yml) that:
 
 - Installs dependencies (Clang, CMake, vcpkg, etc.)
@@ -226,12 +195,10 @@ The repository includes a CircleCI configuration (.circleci/config.yml) that:
 - Checks the Tests tab for test results.
 - Checks the Artifacts tab for the coverage report (in the coverage_html folder).
 
-<<<<<<< HEAD
-=======
 ---
 
->>>>>>> origin/hw1
 ## Issue & PR Templates
+
 This repository contains preconfigured templates for issues and pull requests:
 
 ```
@@ -242,25 +209,23 @@ pull_request_template.md (in the root or in .github/PULL_REQUEST_TEMPLATE/)
 
 These templates ensure that all contributions follow a consistent format.
 
-<<<<<<< HEAD
-=======
 ---
 
->>>>>>> origin/hw1
 ## Contributing
+
 Contributions are welcome! To contribute:
 
 1. Fork this repository
 2. Create a new branch (e.g., feature/your-feature):
-      ```bash
+   ```bash
    git checkout -b feature/your-feature
    ```
 3. Implement your changes (ensure code is formatted and linted):
-      ```bash
+   ```bash
    git commit -m "Add your feat."
    ```
 4. Push to the branch:
-      ```bash
+   ```bash
    git push origin feature/your-feature
    ```
 5. Open a Pull Request and follow the provided template.
@@ -271,4 +236,5 @@ Feel free to open an issue for any feature requests or bug reports.
 ---
 
 ## License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
