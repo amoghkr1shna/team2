@@ -1,4 +1,5 @@
-#include "logger.hpp"
+// #include "logger.hpp"
+#include "src\logger\include\logger.hpp"
 #include <gtest/gtest.h>
 
 TEST(LoggerTests, TestLogOperation) {
