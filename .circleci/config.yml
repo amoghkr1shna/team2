@@ -45,14 +45,31 @@ jobs:
             cp compile_commands.json ../
 
       # Run clang-tidy with proper include paths
+      # - run:
+      #     name: Run clang-tidy
+      #     command: |
+      #       # Run clang-tidy with adjustments
+      #       for file in $(find src tests -name "*.cpp" -o -name "*.h"); do
+      #         echo "Checking $file..."
+      #         clang-tidy -p=. "$file" -- -I. -Isrc -Ibuild/_deps/googletest-src/googletest/include || true
+      #       done
+
       - run:
           name: Run clang-tidy
           command: |
             # Run clang-tidy with adjustments
             for file in $(find src tests -name "*.cpp" -o -name "*.h"); do
               echo "Checking $file..."
-              clang-tidy -p=. "$file" -- -I. -Isrc -Ibuild/_deps/googletest-src/googletest/include || true
+              clang-tidy -p=. "$file" -- \
+                -I. \
+                -Isrc \
+                -Isrc/calculator/include \
+                -Isrc/notifier/include \
+                -Isrc/logger/include \
+                -Ibuild/_deps/googletest-src/googletest/include \
+              || true
             done
+
 
   build-and-test:
     executor: clang-executor
