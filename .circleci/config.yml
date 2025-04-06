@@ -110,6 +110,7 @@ jobs:
           command: |
             cd build
             ctest --output-on-failure -T Test --no-compress-output
+            ctest -T JUnit
 
       # Store test results
       - store_test_results:
@@ -133,6 +134,8 @@ jobs:
             elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
               lcov --capture --directory . --output-file coverage.info
               genhtml coverage.info --output-directory coverage_html
+            else
+              echo "Hello World, no coverage here."
             fi
 
       # - run:
