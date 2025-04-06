@@ -110,7 +110,6 @@ jobs:
           command: |
             cd build
             ctest --output-on-failure -T Test --no-compress-output
-            ctest -T JUnit
 
       # Store test results
       - store_test_results:
