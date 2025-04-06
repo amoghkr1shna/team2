@@ -46,18 +46,21 @@ foreach(header ${INCLUDE_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES ALL_INCLUDES)
 
+target_include_directories(my_code PUBLIC ${ALL_INCLUDES})
+
+
 # Add the main library
 add_library(my_code ${SRC_FILES})
 
 # Add include directories to the library
-target_include_directories(my_code PUBLIC ${ALL_INCLUDES})
+# target_include_directories(my_code PUBLIC ${ALL_INCLUDES})
 
-target_include_directories(my_code PUBLIC
-  ${ALL_INCLUDES}
-  ${PROJECT_SOURCE_DIR}/src/notifier/include
-  ${PROJECT_SOURCE_DIR}/src/calculator/include
-  ${PROJECT_SOURCE_DIR}/src/logger/include
-)
+# target_include_directories(my_code PUBLIC
+#   ${ALL_INCLUDES}
+#   ${PROJECT_SOURCE_DIR}/src/notifier/include
+#   ${PROJECT_SOURCE_DIR}/src/calculator/include
+#   ${PROJECT_SOURCE_DIR}/src/logger/include
+# )
 
 
 # Include GoogleTest
