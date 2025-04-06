@@ -116,8 +116,6 @@ jobs:
             elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
               lcov --capture --directory . --output-file coverage.info
               genhtml coverage.info --output-directory coverage_html
-            else
-              echo "No coverage data found."
             fi
 
       # - run:
