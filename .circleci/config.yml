@@ -105,15 +105,28 @@ jobs:
             make -j$(nproc)
 
       # Run the tests
-      - run:
-          name: Run Tests
-          command: |
-            cd build
-            ctest --output-on-failure -T Test --no-compress-output
+      # - run:
+      #     name: Run Tests
+      #     command: |
+      #       cd build
+      #       ctest --output-on-failure -T Test --no-compress-output
+      
+      # # Store test results
+      # - store_test_results:
+      #     path: build/Testing
 
-      # Store test results
+      - run:
+        name: Run Tests (unit, integration, e2e)
+        command: |
+          cd build
+          ./unit_tests --gtest_output=xml:unit_tests_report.xml
+          ./integration_tests --gtest_output=xml:integration_tests_report.xml
+          ./e2e_tests --gtest_output=xml:e2e_tests_report.xml
+
       - store_test_results:
           path: build/Testing
+
+
 
       # Collect coverage
       - run:
