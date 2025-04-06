@@ -1,5 +1,5 @@
-// #include "notifier.hpp"
-#include "src/notifier/include/notifier.hpp"
+#include "notifier.hpp"
+// #include "src/notifier/include/notifier.hpp"
 #include <string> // Include for std::string and std::to_string
 
 auto Notifier::shouldNotify(int value) const -> bool {

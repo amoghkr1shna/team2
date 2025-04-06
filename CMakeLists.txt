@@ -52,6 +52,13 @@ add_library(my_code ${SRC_FILES})
 # Add include directories to the library
 target_include_directories(my_code PUBLIC ${ALL_INCLUDES})
 
+list(APPEND ALL_INCLUDES
+  ${PROJECT_SOURCE_DIR}/src/notifier/include
+  ${PROJECT_SOURCE_DIR}/src/calculator/include
+  ${PROJECT_SOURCE_DIR}/src/logger/include
+)
+
+
 # Include GoogleTest
 include(FetchContent)
 FetchContent_Declare(
