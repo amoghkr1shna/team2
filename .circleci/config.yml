@@ -129,30 +129,7 @@ jobs:
       - store_test_results:
           path: build/Testing
 
-      # # Collect coverage
-      # - run:
-      #     name: Collect Coverage
-      #     command: |
-      #       cd build
-
-      #       # Create report directory
-      #       mkdir -p coverage_html
-
-      #       # For Clang coverage
-      #       if [ -f "*.profraw" ]; then
-      #         export LLVM_PROFILE_FILE="coverage-%p.profraw"
-      #         find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
-      #         llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
-      #       # For GCC coverage (fallback)
-      #       elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
-      #         lcov --capture --directory . --output-file coverage.info
-      #         genhtml coverage.info --output-directory coverage_html
-      #       else
-      #         echo "Hello World, no coverage here."
-      #       fi
-      
-
-      # Collect coverage (new)
+      # Collect coverage
       - run:
           name: Collect Coverage
           command: |
@@ -160,25 +137,48 @@ jobs:
 
             # Create report directory
             mkdir -p coverage_html
-            # checking for Testing folder and merging the coverage reports
-            if find Testing -name '*.profraw' -print -quit | grep -q '^'; then
-              llvm-profdata merge --sparse Testing/*.profraw -o coverage.profdata || true
 
-              llvm-cov show \
-                Testing/unit_tests \
-                Testing/integration_tests \
-                Testing/e2e_tests \
-                -instr-profile=coverage.profdata \
-                --format=html \
-                -output-dir=coverage_html
-
+            # For Clang coverage
+            if [ -f "*.profraw" ]; then
+              export LLVM_PROFILE_FILE="coverage-%p.profraw"
+              find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
+              llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
             # For GCC coverage (fallback)
-            elif find Testing -name '*.gcda' -o -name '*.gcno' | grep -q '^'; then 
-              lcov --capture --directory Testing --output-file coverage.info
+            elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
+              lcov --capture --directory . --output-file coverage.info
               genhtml coverage.info --output-directory coverage_html
             else
               echo "Hello World, no coverage here."
             fi
+      
+
+      # # Collect coverage (new)
+      # - run:
+      #     name: Collect Coverage
+      #     command: |
+      #       cd build
+
+      #       # Create report directory
+      #       mkdir -p coverage_html
+      #       # checking for Testing folder and merging the coverage reports
+      #       if find Testing -name '*.profraw' -print -quit | grep -q '^'; then
+      #         llvm-profdata merge --sparse Testing/*.profraw -o coverage.profdata || true
+
+      #         llvm-cov show \
+      #           Testing/unit_tests \
+      #           Testing/integration_tests \
+      #           Testing/e2e_tests \
+      #           -instr-profile=coverage.profdata \
+      #           --format=html \
+      #           -output-dir=coverage_html
+
+      #       # For GCC coverage (fallback)
+      #       elif find Testing -name '*.gcda' -o -name '*.gcno' | grep -q '^'; then 
+      #         lcov --capture --directory Testing --output-file coverage.info
+      #         genhtml coverage.info --output-directory coverage_html
+      #       else
+      #         echo "Hello World, no coverage here."
+      #       fi
 
       # - run:
       #     name: Collect Coverage with lcov
