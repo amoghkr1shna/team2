@@ -135,6 +135,17 @@ jobs:
 
             # Create report directory
             mkdir -p coverage_html
+            # checking for Testing folder and merging the coverage reports
+            if find Testing -name '*.profraw' -print -quit | grep -q '^'; then
+              llvm-profdata merge --sparse Testing/*.profraw -o coverage.profdata || true
+
+              llvm-cov show \
+                Testing/unit_tests \
+                Testing/integration_tests \
+                Testing/e2e_tests \
+                -instr-profile=coverage.profdata \
+                --format=html \
+                -output-dir=coverage_html
 
             # For Clang coverage
             if [ -f "*.profraw" ]; then
