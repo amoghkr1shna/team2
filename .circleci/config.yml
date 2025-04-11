@@ -122,6 +122,9 @@ jobs:
           command: |
             cd build
             mkdir -p Testing
+            # Set LLVM profile file environment variable
+            export LLVM_PROFILE_FILE="Testing/coverage-%p.profraw"
+            # Run tests with coverage instrumentation
             ./unit_tests --gtest_output=xml:Testing/unit_tests_report.xml
             ./integration_tests --gtest_output=xml:Testing/integration_tests_report.xml
             ./e2e_tests --gtest_output=xml:Testing/e2e_tests_report.xml
@@ -139,14 +142,19 @@ jobs:
             mkdir -p coverage_html
 
             # For Clang coverage
-            if [ -f "*.profraw" ]; then
-              export LLVM_PROFILE_FILE="coverage-%p.profraw"
-              find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
-              llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
+            if [ -f "Testing/*.profraw" ]; then
+              llvm-profdata merge --sparse Testing/*.profraw -o Testing/coverage.profdata
+              llvm-cov show \
+                ./unit_tests \
+                ./integration_tests \
+                ./e2e_tests \
+                -instr-profile=Testing/coverage.profdata \
+                --format=html \
+                -output-dir=coverage_html
             # For GCC coverage (fallback)
-            elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
-              lcov --capture --directory . --output-file coverage.info
-              genhtml coverage.info --output-directory coverage_html
+            elif [ -f "Testing/*.gcda" ] || [ -f "Testing/*.gcno" ]; then
+              lcov --capture --directory Testing --output-file Testing/coverage.info
+              genhtml Testing/coverage.info --output-directory coverage_html
             else
               echo "Hello World, no coverage here."
             fi
@@ -202,13 +210,9 @@ jobs:
       #       fi
 
       # Store coverage artifacts
-      # - store_artifacts:
-      #     path: build/coverage_html
-      #     destination: coverage_html
-
-      # - store_artifacts:
-      #     path: build/coverage.info
-      #     destination: coverage.info
+      - store_artifacts:
+          path: build/coverage_html
+          destination: coverage_html
 
       # Store build artifacts
       - store_artifacts:
