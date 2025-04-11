@@ -1,4 +1,4 @@
-# Prerequisites
+# Prerequisite files
 *.d
 
 # Compiled Object files
@@ -11,16 +11,16 @@
 *.gch
 *.pch
 
-# Compiled Dynamic libraries
+# Compiled Dynamic Libraries
 *.so
 *.dylib
 *.dll
 
-# Fortran module files
+# Fortran Module files
 *.mod
 *.smod
 
-# Compiled Static libraries
+# Compiled Static Libraries
 *.lai
 *.la
 *.a
@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Mac OS Files
+*.DS_Store
+
+# IDE / Editor Settings
+.vscode/
+
+# CMake / Build Files
+build/
+compile_commands.json
