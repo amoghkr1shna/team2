@@ -210,9 +210,9 @@ jobs:
       #       fi
 
       # Store coverage artifacts
-      - store_artifacts:
-          path: build/coverage_html
-          destination: coverage_html
+      # - store_artifacts:
+      #     path: build/coverage_html
+      #     destination: coverage_html
 
       # Store build artifacts
       - store_artifacts:
