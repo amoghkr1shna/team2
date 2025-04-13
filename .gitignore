@@ -40,3 +40,6 @@
 # CMake / Build Files
 build/
 compile_commands.json
+
+# Environment variables
+.env
