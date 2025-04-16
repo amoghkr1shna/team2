@@ -41,5 +41,8 @@
 build/
 compile_commands.json
 
+# Cache Files
+__pycache__/
+
 # Environment variables
 .env
