@@ -10,7 +10,14 @@ from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from enum import Enum
 import uuid
+import os
+import json
+import asyncio
+from dotenv import load_dotenv
+from openai import AsyncOpenAI
 
+# Load environment variables
+load_dotenv()
 
 class MessageRole(Enum):
     """Roles for conversation messages."""
@@ -58,6 +65,30 @@ class Message:
     def timestamp(self) -> datetime:
         """Return the timestamp of the message."""
         return self._timestamp
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the message to a dictionary for API requests."""
+        return {
+            "role": self._role.value,
+            "content": self._content
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Message':
+        """Create a message from a dictionary."""
+        role = MessageRole(data.get("role", "user"))
+        content = data.get("content", "")
+        message_id = data.get("id")
+        timestamp_str = data.get("timestamp")
+        
+        timestamp = None
+        if timestamp_str:
+            try:
+                timestamp = datetime.fromisoformat(timestamp_str)
+            except ValueError:
+                timestamp = datetime.now()
+        
+        return cls(content, role, message_id, timestamp)
 
 
 class Conversation:
@@ -75,7 +106,7 @@ class Conversation:
             system_prompt: Optional system prompt to set the AI's behavior
         """
         self._id = conversation_id or f"conv_{uuid.uuid4().hex[:8]}"
-        self._title = title
+        self._title = title or f"Conversation {self._id}"
         self._messages: List[Message] = []
         
         # Add system message if provided
@@ -117,6 +148,49 @@ class Conversation:
             A list of the most recent messages
         """
         return self._messages[-count:] if self._messages else []
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the conversation to a dictionary for storage/serialization."""
+        return {
+            "id": self._id,
+            "title": self._title,
+            "messages": [
+                {
+                    "id": msg.id,
+                    "content": msg.content,
+                    "role": msg.role.value,
+                    "timestamp": msg.timestamp.isoformat()
+                }
+                for msg in self._messages
+            ]
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Conversation':
+        """Create a conversation from a dictionary."""
+        conversation_id = data.get("id")
+        title = data.get("title")
+        
+        conversation = cls(conversation_id, title)
+        
+        # Add messages
+        for msg_data in data.get("messages", []):
+            role = MessageRole(msg_data.get("role", "user"))
+            content = msg_data.get("content", "")
+            message_id = msg_data.get("id")
+            
+            timestamp = None
+            timestamp_str = msg_data.get("timestamp")
+            if timestamp_str:
+                try:
+                    timestamp = datetime.fromisoformat(timestamp_str)
+                except ValueError:
+                    timestamp = datetime.now()
+            
+            message = Message(content, role, message_id, timestamp)
+            conversation.add_message(message)
+        
+        return conversation
 
 
 class AIClient:
@@ -135,14 +209,21 @@ class AIClient:
             temperature: Controls randomness (0-1, default: 0.7)
             max_tokens: Maximum tokens in response (None for model default)
         """
-        self._api_key = api_key
-        self._model = model
-        self._temperature = temperature
-        self._max_tokens = max_tokens
+        self._api_key = api_key or os.getenv("OPENAI_API_KEY")
+        if not self._api_key:
+            raise ValueError("OpenAI API key is required. Provide it as a parameter or set it in the OPENAI_API_KEY environment variable.")
+        
+        self._model = model or os.getenv("MODEL", "gpt-3.5-turbo")
+        self._temperature = temperature if temperature is not None else float(os.getenv("TEMPERATURE", "0.7"))
+        self._max_tokens = max_tokens or (int(os.getenv("MAX_TOKENS")) if os.getenv("MAX_TOKENS") else None)
         self._conversations: Dict[str, Conversation] = {}
+        
+        # Initialize the OpenAI client
+        # Use simpler initialization to avoid compatibility issues
+        self._client = AsyncOpenAI(api_key=self._api_key)
     
     def create_conversation(self, title: Optional[str] = None, 
-                           system_prompt: Optional[str] = None) -> Conversation:
+                          system_prompt: Optional[str] = None) -> Conversation:
         """
         Create a new conversation.
         
@@ -201,15 +282,32 @@ class AIClient:
         user_message = Message(message_content, MessageRole.USER)
         conversation.add_message(user_message)
         
-        # In a real implementation, this would make an API call to OpenAI
-        # For now, we'll create a placeholder response
-        response_content = f"This is a placeholder response to: {message_content}"
-        ai_message = Message(response_content, MessageRole.ASSISTANT)
+        # Prepare messages for the API request
+        messages = [msg.to_dict() for msg in conversation.messages]
         
-        # Add AI response to conversation
-        conversation.add_message(ai_message)
-        
-        return ai_message
+        try:
+            # Call the OpenAI API
+            response = await self._client.chat.completions.create(
+                model=self._model,
+                messages=messages,
+                temperature=self._temperature,
+                max_tokens=self._max_tokens
+            )
+            
+            # Extract the response content
+            response_content = response.choices[0].message.content
+            
+            # Create a message from the response
+            ai_message = Message(response_content, MessageRole.ASSISTANT)
+            
+            # Add AI response to conversation
+            conversation.add_message(ai_message)
+            
+            return ai_message
+        except Exception as e:
+            # Handle API errors
+            error_message = f"Error communicating with OpenAI API: {str(e)}"
+            raise ConnectionError(error_message) from e
     
     def set_model(self, model: str) -> None:
         """
@@ -221,7 +319,7 @@ class AIClient:
         self._model = model
     
     def export_conversation(self, conversation_id: str, 
-                           format: str = "json") -> Union[str, Dict[str, Any]]:
+                          format: str = "json") -> Union[str, Dict[str, Any]]:
         """
         Export a conversation in the specified format.
         
@@ -239,10 +337,57 @@ class AIClient:
         if not conversation:
             raise ValueError(f"Conversation with ID {conversation_id} not found")
         
-        # This is a placeholder - a real implementation would format accordingly
         if format.lower() == "json":
-            return {"id": conversation.id, "title": conversation.title}
+            return conversation.to_dict()
         elif format.lower() == "text":
-            return f"Conversation {conversation.id}: {conversation.title}"
+            # Format as text
+            text_output = f"# {conversation.title}\n\n"
+            
+            for msg in conversation.messages:
+                timestamp = msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                role_name = msg.role.name.capitalize()
+                text_output += f"[{timestamp}] {role_name}: {msg.content}\n\n"
+            
+            return text_output
         else:
-            raise ValueError(f"Unsupported export format: {format}") 
+            raise ValueError(f"Unsupported export format: {format}")
+    
+    def save_conversations(self, file_path: str) -> None:
+        """
+        Save all conversations to a file.
+        
+        Args:
+            file_path: The path to save the conversations to
+            
+        Raises:
+            IOError: If there's an issue saving the file
+        """
+        try:
+            data = {
+                "conversations": [conv.to_dict() for conv in self._conversations.values()]
+            }
+            
+            with open(file_path, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            raise IOError(f"Error saving conversations: {str(e)}") from e
+    
+    def load_conversations(self, file_path: str) -> None:
+        """
+        Load conversations from a file.
+        
+        Args:
+            file_path: The path to load the conversations from
+            
+        Raises:
+            IOError: If there's an issue loading the file
+        """
+        try:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+            
+            for conv_data in data.get("conversations", []):
+                conversation = Conversation.from_dict(conv_data)
+                self._conversations[conversation.id] = conversation
+        except Exception as e:
+            raise IOError(f"Error loading conversations: {str(e)}") from e 
