@@ -4,6 +4,22 @@ Command-line interface for the AI Conversation Client.
 
 This module provides a simple command-line interface for interacting
 with the AI Conversation Client.
+
+Usage:
+    # Start a new chat session
+    python -m ai_conversation_client.cli chat
+    
+    # Continue an existing conversation
+    python -m ai_conversation_client.cli chat --conversation-id CONV_ID
+    
+    # List all saved conversations
+    python -m ai_conversation_client.cli list
+    
+    # Export a conversation
+    python -m ai_conversation_client.cli export CONV_ID --format text
+    
+    # Load conversations from a file
+    python -m ai_conversation_client.cli load conversations.json
 """
 
 import asyncio
@@ -15,7 +31,25 @@ sys.path.insert(0, os.path.abspath('..'))
 from ai_conversation_client import AIClient, MessageRole, Message
 
 async def chat_mode(client, conversation_id=None, system_prompt=None):
-    """Interactive chat mode with the AI."""
+    """
+    Start an interactive chat session with the AI.
+    
+    This function provides a REPL (Read-Eval-Print Loop) interface for chatting with
+    the AI. It either creates a new conversation or continues an existing one.
+    
+    Special commands:
+        exit, quit: End the chat session
+        save: Save all conversations to a file
+        export json/text: Export the current conversation
+    
+    Args:
+        client: An instance of AIClient
+        conversation_id: Optional ID of an existing conversation to continue
+        system_prompt: Optional system prompt for a new conversation
+        
+    Returns:
+        None
+    """
     # Create or load a conversation
     if conversation_id:
         conversation = client.get_conversation(conversation_id)
@@ -88,7 +122,23 @@ async def chat_mode(client, conversation_id=None, system_prompt=None):
             print(f"Error: {str(e)}")
 
 async def main():
-    """Main entry point for the CLI."""
+    """
+    Main entry point for the CLI application.
+    
+    This function parses command-line arguments and executes the appropriate
+    command based on user input. Available commands:
+    
+    - chat: Start an interactive chat session
+    - list: List all saved conversations
+    - export: Export a conversation to text or JSON
+    - load: Load conversations from a file
+    
+    Returns:
+        None
+        
+    Raises:
+        SystemExit: If the OpenAI API key is missing
+    """
     parser = argparse.ArgumentParser(description="AI Conversation Client CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
     

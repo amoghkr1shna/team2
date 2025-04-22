@@ -1,11 +1,45 @@
 #!/usr/bin/env python3
+"""
+Example usage of the AI Conversation Client.
+
+This script demonstrates how to use the AI Conversation Client to:
+1. Create a new conversation with a system prompt
+2. Send messages to the AI and receive responses
+3. Send follow-up messages in the same conversation
+4. Export a conversation as text
+5. Save conversations to a file for later use
+
+Usage:
+    python -m ai_conversation_client.example
+    
+Requirements:
+    - OpenAI API key set in .env file or environment variables
+    - AI Conversation Client package installed
+"""
+
 import asyncio
 import os
 from dotenv import load_dotenv
 from ai_conversation_client import AIClient
 
 async def main():
-    """Run the example."""
+    """
+    Run the example AI conversation workflow.
+    
+    This function demonstrates a complete workflow for using the AI Conversation Client:
+    - Setting up the client with environment variables
+    - Creating a conversation with a custom system prompt
+    - Sending an initial message and receiving a response
+    - Sending a follow-up message in the same conversation
+    - Exporting the conversation as text
+    - Saving the conversation to a file
+    
+    Returns:
+        None
+        
+    Note:
+        Requires an OpenAI API key to be set in the environment or .env file.
+    """
     # Load environment variables
     load_dotenv()
     

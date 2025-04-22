@@ -4,6 +4,20 @@ AI Conversation Client
 A Python client for interacting with OpenAI's ChatGPT API.
 This module provides an interface for sending messages, managing conversations,
 and handling responses from the OpenAI API.
+
+Usage:
+    from ai_conversation_client import AIClient, Message, MessageRole
+    
+    # Create a client
+    client = AIClient(api_key="your_api_key")
+    
+    # Create a conversation
+    conversation = client.create_conversation(title="My Chat", 
+                                             system_prompt="You are a helpful assistant.")
+    
+    # Send a message and get a response
+    response = await client.send_message(conversation.id, "Hello, AI!")
+    print(response.content)
 """
 
 from typing import List, Dict, Any, Optional, Union
@@ -20,7 +34,15 @@ from openai import AsyncOpenAI
 load_dotenv()
 
 class MessageRole(Enum):
-    """Roles for conversation messages."""
+    """
+    Roles for conversation messages.
+    
+    Attributes:
+        SYSTEM: Messages that instruct or inform the AI about its behavior
+        USER: Messages from the human user
+        ASSISTANT: Messages from the AI assistant
+        FUNCTION: Messages used for function calling (advanced feature)
+    """
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -252,27 +274,39 @@ class AIClient:
     
     def list_conversations(self) -> List[Conversation]:
         """
-        List all conversations.
+        List all available conversations.
         
         Returns:
-            A list of all conversations
+            A list of all conversations managed by this client
+            
+        Usage:
+            conversations = client.list_conversations()
+            for conv in conversations:
+                print(f"{conv.title} (ID: {conv.id})")
         """
         return list(self._conversations.values())
     
     async def send_message(self, conversation_id: str, message_content: str) -> Message:
         """
-        Send a message to the AI and get a response.
+        Send a user message to the AI and get a response.
+        
+        This is the main method for interacting with the AI. It sends a message to
+        the specified conversation and returns the AI's response.
         
         Args:
-            conversation_id: The ID of the conversation
+            conversation_id: The ID of the conversation to send the message to
             message_content: The content of the message to send
             
         Returns:
-            The AI's response message
+            A Message object containing the AI's response
             
         Raises:
-            ValueError: If the conversation doesn't exist
-            ConnectionError: If there's an issue with the API connection
+            ValueError: If the conversation ID is not found
+            Exception: If there is an error communicating with the OpenAI API
+            
+        Usage:
+            response = await client.send_message(conversation.id, "Hello, AI!")
+            print(response.content)
         """
         conversation = self.get_conversation(conversation_id)
         if not conversation:
@@ -311,27 +345,41 @@ class AIClient:
     
     def set_model(self, model: str) -> None:
         """
-        Change the AI model being used.
+        Change the AI model used for generating responses.
         
         Args:
-            model: The name of the model to use
+            model: The name of the OpenAI model to use (e.g., "gpt-3.5-turbo", "gpt-4")
+            
+        Usage:
+            client.set_model("gpt-4")
         """
         self._model = model
     
     def export_conversation(self, conversation_id: str, 
                           format: str = "json") -> Union[str, Dict[str, Any]]:
         """
-        Export a conversation in the specified format.
+        Export a conversation to a specified format.
         
         Args:
             conversation_id: The ID of the conversation to export
-            format: The format to export to (json, text, etc.)
+            format: The format to export to ("json" or "text")
             
         Returns:
-            The exported conversation
+            A string (for "text" format) or dictionary (for "json" format)
+            representing the conversation
             
         Raises:
-            ValueError: If the conversation doesn't exist or format is invalid
+            ValueError: If the conversation ID is not found or if the format is invalid
+            
+        Usage:
+            # Export as text
+            text_export = client.export_conversation(conversation.id, "text")
+            print(text_export)
+            
+            # Export as JSON
+            json_export = client.export_conversation(conversation.id, "json")
+            import json
+            print(json.dumps(json_export, indent=2))
         """
         conversation = self.get_conversation(conversation_id)
         if not conversation:
@@ -354,13 +402,16 @@ class AIClient:
     
     def save_conversations(self, file_path: str) -> None:
         """
-        Save all conversations to a file.
+        Save all conversations to a JSON file.
         
         Args:
             file_path: The path to save the conversations to
             
         Raises:
-            IOError: If there's an issue saving the file
+            IOError: If there's an error writing to the file
+            
+        Usage:
+            client.save_conversations("conversations.json")
         """
         try:
             data = {
@@ -374,13 +425,20 @@ class AIClient:
     
     def load_conversations(self, file_path: str) -> None:
         """
-        Load conversations from a file.
+        Load conversations from a JSON file.
         
         Args:
             file_path: The path to load the conversations from
             
         Raises:
-            IOError: If there's an issue loading the file
+            IOError: If there's an error reading from the file
+            ValueError: If the file contains invalid data
+            
+        Usage:
+            client.load_conversations("conversations.json")
+            
+        Note:
+            This will replace any existing conversations with the same IDs.
         """
         try:
             with open(file_path, 'r') as f:
