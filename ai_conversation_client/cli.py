@@ -28,7 +28,8 @@ import os
 import sys
 from dotenv import load_dotenv
 sys.path.insert(0, os.path.abspath('..'))
-from ai_conversation_client import AIClient, MessageRole, Message
+from ai_conversation_client import MessageRole, Message
+from ai_conversation_client.providers import OpenAIClient
 
 async def chat_mode(client, conversation_id=None, system_prompt=None):
     """
@@ -173,7 +174,7 @@ async def main():
         sys.exit(1)
     
     # Create an AI client
-    client = AIClient()
+    client = OpenAIClient()
     
     if args.command == "chat":
         await chat_mode(client, args.conversation_id, args.system_prompt)

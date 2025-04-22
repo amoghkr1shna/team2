@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+ai_conversation_client/__init__.py
+ai_conversation_client/cli.py
+ai_conversation_client/example.py
+ai_conversation_client.egg-info/PKG-INFO
+ai_conversation_client.egg-info/SOURCES.txt
+ai_conversation_client.egg-info/dependency_links.txt
+ai_conversation_client.egg-info/requires.txt
+ai_conversation_client.egg-info/top_level.txt
+ai_conversation_client/providers/__init__.py
+ai_conversation_client/providers/openai.py
