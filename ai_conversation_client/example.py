@@ -20,7 +20,7 @@ Requirements:
 import asyncio
 import os
 from dotenv import load_dotenv
-from ai_conversation_client.providers import OpenAIClient
+from ai_conversation_client import AIClient
 
 async def main():
     """
@@ -50,7 +50,7 @@ async def main():
         return
     
     # Create an AI client
-    client = OpenAIClient()
+    client = AIClient()
     
     # Create a conversation with a system prompt
     conversation = client.create_conversation(
