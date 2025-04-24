@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai_conversation_client"
+version = "0.1.0"
+description = "A generic AI conversation client interface"
+requires-python = ">=3.8"
+dependencies = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.1",
+    "python-dotenv>=1.0.0",
+    "aiohttp>=3.8.5"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v"
+markers = [
+    "asyncio: mark a test as an asyncio test",
+]
+
+[tool.ruff]
+select = ["E", "F", "B", "I"]
+ignore = []
+line-length = 88
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
