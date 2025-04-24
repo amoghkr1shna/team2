@@ -144,29 +144,56 @@ jobs:
           path: build/test-results
 
       # Collect coverage
+      # - run:
+      #     name: Collect Coverage
+      #     command: |
+      #       cd build
+
+      #       # Create report directory
+      #       mkdir -p coverage_html
+
+      #       # For Clang coverage
+      #       if [ -f "*.profraw" ]; then
+      #         export LLVM_PROFILE_FILE="coverage-%p.profraw"
+      #         find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
+      #         llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
+      #       # For GCC coverage (fallback)
+      #       elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
+      #         lcov --capture --directory . --output-file coverage.info
+      #         genhtml coverage.info --output-directory coverage_html
+      #       fi
+
+      # Collect coverage
       - run:
           name: Collect Coverage
           command: |
             cd build
-
             # Create report directory
             mkdir -p coverage_html
 
             # For Clang coverage
-            if [ -f "*.profraw" ]; then
-              export LLVM_PROFILE_FILE="coverage-%p.profraw"
-              find . -name "*.profraw" -exec llvm-profdata merge --sparse {} -o coverage.profdata \;
-              llvm-cov show ./unit_tests -instr-profile=coverage.profdata --format=html -output-dir=coverage_html
-            # For GCC coverage (fallback)
-            elif [ -f "*.gcda" ] || [ -f "*.gcno" ]; then
-              lcov --capture --directory . --output-file coverage.info
-              genhtml coverage.info --output-directory coverage_html
-            fi
+            export LLVM_PROFILE_FILE="coverage-%p.profraw"
+            # Run tests with coverage
+            ./unit_tests
+            
+            # Find and merge coverage data
+            find . -name "*.profraw" -type f -exec llvm-profdata merge -sparse {} -o coverage.profdata \;
+            
+            # Generate coverage report
+            llvm-cov show ./unit_tests -instr-profile=coverage.profdata -format=html -output-dir=coverage_html || true
+            
+            # Generate text summary for console
+            llvm-cov report ./unit_tests -instr-profile=coverage.profdata
 
-      # Store coverage reports
+      # Store coverage artifacts
       - store_artifacts:
           path: build/coverage_html
-          destination: coverage_html
+          destination: coverage-report
+
+      # Store test results artifacts
+      - store_artifacts:
+          path: build/test-results
+          destination: test-results
 
 workflows:
   version: 2
