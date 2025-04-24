@@ -88,18 +88,58 @@ jobs:
             make -j$(nproc)
 
       # Run the tests
+      # - run:
+      #     name: Run Tests
+      #     command: |
+      #       cd build
+      #       #installing xsltproc for converting from CTest XML to JUnit XML
+      #       apt-get update && apt-get install -y xsltproc wget
+      #       wget https://raw.githubusercontent.com/Kitware/CMake/master/Modules/CTest2JUnit.xsl -O ctest2junit.xsl
+      #       ctest --output-on-failure -T Test --no-compress-output
+      #       mkdir -p test-results
+      #       xsltproc ctest2junit.xsl Testing/*/Test.xml > test-results/junit.xml
+      #       # xsltproc /usr/share/cmake*/ctest2junit.xsl Testing/*/Test.xml > test-results/junit.xml
+      # Run the tests
       - run:
           name: Run Tests
           command: |
             cd build
-            #installing xsltproc for converting from CTest XML to JUnit XML
+            # Install required tools
             apt-get update && apt-get install -y xsltproc wget
-            wget https://raw.githubusercontent.com/Kitware/CMake/master/Modules/CTest2JUnit.xsl -O ctest2junit.xsl
+            
+            # Create a simple XSLT file for conversion
+            cat << 'EOF' > ctest2junit.xsl
+            <?xml version="1.0" encoding="UTF-8"?>
+            <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+              <xsl:output method="xml" indent="yes"/>
+              <xsl:template match="/">
+                <testsuites>
+                  <xsl:for-each select="Site/Testing/Test">
+                    <testsuite>
+                      <testcase name="{Name}">
+                        <xsl:if test="@Status = 'failed'">
+                          <failure>
+                            <xsl:value-of select="Results/Measurement/Value"/>
+                          </failure>
+                        </xsl:if>
+                      </testcase>
+                    </testsuite>
+                  </xsl:for-each>
+                </testsuites>
+              </xsl:template>
+            </xsl:stylesheet>
+            EOF
+            
+            # Run tests
             ctest --output-on-failure -T Test --no-compress-output
+            
+            # Create directory and convert results
             mkdir -p test-results
             xsltproc ctest2junit.xsl Testing/*/Test.xml > test-results/junit.xml
-            # xsltproc /usr/share/cmake*/ctest2junit.xsl Testing/*/Test.xml > test-results/junit.xml
 
+      # Store test results
+      - store_test_results:
+          path: build/test-results
 
       # Store test results
       - store_test_results:
