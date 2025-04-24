@@ -105,11 +105,10 @@ jobs:
           command: |
             cd build
             # Install required tools
-            apt-get update && apt-get install -y xsltproc wget
+            apt-get update && apt-get install -y xsltproc
             
-            # Create a simple XSLT file for conversion
-            cat << 'EOF' > ctest2junit.xsl
-            <?xml version="1.0" encoding="UTF-8"?>
+            # Create XSLT file using echo instead of heredoc
+            echo '<?xml version="1.0" encoding="UTF-8"?>
             <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
               <xsl:output method="xml" indent="yes"/>
               <xsl:template match="/">
@@ -117,7 +116,7 @@ jobs:
                   <xsl:for-each select="Site/Testing/Test">
                     <testsuite>
                       <testcase name="{Name}">
-                        <xsl:if test="@Status = 'failed'">
+                        <xsl:if test="@Status = '\''failed'\''">
                           <failure>
                             <xsl:value-of select="Results/Measurement/Value"/>
                           </failure>
@@ -127,8 +126,7 @@ jobs:
                   </xsl:for-each>
                 </testsuites>
               </xsl:template>
-            </xsl:stylesheet>
-            EOF
+            </xsl:stylesheet>' > ctest2junit.xsl
             
             # Run tests
             ctest --output-on-failure -T Test --no-compress-output
