@@ -92,11 +92,15 @@ jobs:
           name: Run Tests
           command: |
             cd build
+            apt-get update && apt-get install -y xsltproc #installing xsltproc for converting from CTest XML to JUnit XML
             ctest --output-on-failure -T Test --no-compress-output
+            mkdir -p test-results
+            xsltproc /usr/share/cmake*/ctest2junit.xsl Testing/*/Test.xml > test-results/junit.xml
+
 
       # Store test results
       - store_test_results:
-          path: build/Testing
+          path: build/test-results
 
       # Collect coverage
       - run:
