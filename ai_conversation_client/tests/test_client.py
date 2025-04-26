@@ -14,6 +14,8 @@ class DummyAIBackend(AIBackend):
     
     async def generate_response(self, messages: List[Message], **kwargs: Any) -> Message:
         """Generate a simple echo response."""
+        if not messages:
+            raise ValueError("Messages list cannot be empty")
         last_message = messages[-1]
         return Message(
             f"Echo: {last_message.content}",
@@ -21,9 +23,22 @@ class DummyAIBackend(AIBackend):
         )
 
 
+class ErrorAIBackend(AIBackend):
+    """A backend that always raises an error."""
+    
+    async def generate_response(self, messages: List[Message], **kwargs: Any) -> Message:
+        """Always raises an error."""
+        raise RuntimeError("Backend error")
+
+
 @pytest.fixture
 def backend():
     return DummyAIBackend()
+
+
+@pytest.fixture
+def error_backend():
+    return ErrorAIBackend()
 
 
 @pytest.fixture
@@ -58,6 +73,36 @@ class TestMessage:
         custom_time = datetime(2024, 1, 1)
         message = Message("content", timestamp=custom_time)
         assert message.timestamp == custom_time
+    
+    def test_message_immutability(self):
+        """Test that message properties cannot be modified."""
+        message = Message("test")
+        with pytest.raises(AttributeError):
+            message.content = "new content"
+        with pytest.raises(AttributeError):
+            message.role = MessageRole.ASSISTANT
+        with pytest.raises(AttributeError):
+            message.id = "new_id"
+        with pytest.raises(AttributeError):
+            message.timestamp = datetime.now()
+    
+    def test_empty_message_content(self):
+        """Test that empty message content is not allowed."""
+        with pytest.raises(ValueError):
+            Message("")
+        with pytest.raises(ValueError):
+            Message("   ")
+    
+    def test_invalid_role_type(self):
+        """Test that role must be a MessageRole enum."""
+        with pytest.raises(TypeError):
+            Message("test", role="user")
+    
+    def test_content_whitespace_handling(self):
+        """Test that leading/trailing whitespace is stripped."""
+        message = Message("  test  ")
+        assert message.content == "test"
+
 
 class TestConversation:
     """Tests for the Conversation class."""
@@ -93,6 +138,38 @@ class TestConversation:
         for orig, stored in zip(messages, conv.messages):
             assert orig.content == stored.content
             assert orig.role == stored.role
+    
+    def test_conversation_immutability(self):
+        """Test that conversation properties cannot be modified."""
+        conv = Conversation("conv_123", "Test")
+        with pytest.raises(AttributeError):
+            conv.id = "new_id"
+        with pytest.raises(AttributeError):
+            conv.title = "New Title"
+        
+        # Messages list should be a copy
+        messages = conv.messages
+        messages.append(Message("test"))
+        assert len(conv.messages) == 0
+    
+    def test_empty_system_prompt(self):
+        """Test that empty system prompt is not allowed."""
+        with pytest.raises(ValueError):
+            Conversation(system_prompt="")
+        with pytest.raises(ValueError):
+            Conversation(system_prompt="   ")
+    
+    def test_invalid_message_type(self):
+        """Test that only Message instances can be added."""
+        conv = Conversation()
+        with pytest.raises(TypeError):
+            conv.add_message("not a message")
+    
+    def test_title_whitespace_handling(self):
+        """Test that title whitespace is handled correctly."""
+        conv = Conversation(title="  Test Title  ")
+        assert conv.title == "Test Title"
+
 
 class TestAIClient:
     """Tests for the AIClient class."""
@@ -100,9 +177,7 @@ class TestAIClient:
     def test_create_conversation(self, client):
         """Test that a conversation can be created and stored in the client."""
         title = "Test Conversation"
-        
         conversation = client.create_conversation(title)
-        
         assert conversation.title == title
         assert client.get_conversation(conversation.id) == conversation
     
@@ -155,3 +230,27 @@ class TestAIClient:
         for i in range(0, len(conv.messages), 2):
             assert conv.messages[i].role == MessageRole.USER
             assert conv.messages[i+1].role == MessageRole.ASSISTANT
+    
+    def test_invalid_backend_type(self):
+        """Test that backend must implement AIBackend."""
+        with pytest.raises(TypeError):
+            AIClient("not a backend")
+    
+    @pytest.mark.asyncio
+    async def test_backend_error_handling(self, error_backend):
+        """Test that backend errors are properly handled."""
+        client = AIClient(error_backend)
+        conv = client.create_conversation()
+        
+        with pytest.raises(RuntimeError) as exc_info:
+            await client.send_message(conv.id, "Hello")
+        assert "Backend error" in str(exc_info.value)
+    
+    @pytest.mark.asyncio
+    async def test_empty_message_content(self, client):
+        """Test that empty messages are not allowed."""
+        conv = client.create_conversation()
+        with pytest.raises(ValueError):
+            await client.send_message(conv.id, "")
+        with pytest.raises(ValueError):
+            await client.send_message(conv.id, "   ")
