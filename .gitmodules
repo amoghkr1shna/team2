@@ -1,0 +1,4 @@
+[submodule "external/email-client"]
+	path = external/email-client
+	url = https://github.com/KrapaKarthik09/team8-yotov-template-repository.git
+	branch = implementation
